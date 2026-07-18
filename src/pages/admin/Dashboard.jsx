@@ -13,8 +13,8 @@ import {
 import toast from "react-hot-toast";
 
 import api from "../../api/axios";
-import "../../styles/adminCommon.css";
-import "../../styles/adminDashboard.css";
+import "../../styles/admincommon.css";
+import "../../styles/admindashboard.css";
 import AdminSidebar from "../../components/AdminSidebar";
 
 const Dashboard = () => {

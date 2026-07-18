@@ -16,8 +16,8 @@ import {
   updateProduct,
 } from "../../api/product";
 
-import "../../styles/adminCommon.css";
-import "../../styles/adminStock.css";
+import "../../styles/admincommon.css";
+import "../../styles/adminstock.css";
 
 const Stock = () => {
   const adminUser = JSON.parse(

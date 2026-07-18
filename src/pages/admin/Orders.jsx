@@ -19,8 +19,8 @@ import {
   updateAdminOrderStatus,
 } from "../../api/order";
 
-import "../../styles/adminCommon.css";
-import "../../styles/adminOrder.css";
+import "../../styles/admincommon.css";
+import "../../styles/adminorder.css";
 
 const Orders = () => {
   const adminUser = JSON.parse(

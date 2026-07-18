@@ -21,8 +21,8 @@ import {
   
 } from "../../api/product";
 
-import "../../styles/adminCommon.css";
-import "../../styles/adminProduct.css";
+import "../../styles/admincommon.css";
+import "../../styles/adminproduct.css";
 import defaultProductImage from "../../assets/image.jpeg";
 import AdminSidebar from "../../components/AdminSidebar";
 

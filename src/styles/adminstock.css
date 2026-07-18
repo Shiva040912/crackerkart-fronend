@@ -1,0 +1,400 @@
+/* =========================
+   STOCK SUMMARY
+========================= */
+
+.stock-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.stock-summary-card {
+  min-height: 130px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+}
+
+.stock-summary-icon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.stock-summary-icon.total {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.stock-summary-icon.healthy {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.stock-summary-icon.low {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.stock-summary-icon.out {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.stock-summary-card p {
+  margin: 0 0 6px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.stock-summary-card strong {
+  color: #0f172a;
+  font-size: 29px;
+  font-weight: 900;
+}
+
+/* =========================
+   STOCK PANEL
+========================= */
+
+.stock-management-panel {
+  margin-top: 22px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+}
+
+/* =========================
+   SEARCH + FILTER
+========================= */
+
+.stock-toolbar {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) 240px;
+  gap: 14px;
+}
+
+.stock-search-box {
+  height: 48px;
+  padding: 0 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  color: #64748b;
+}
+
+.stock-search-box svg {
+  flex-shrink: 0;
+  font-size: 19px;
+}
+
+.stock-search-box input {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  caret-color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: none !important;
+}
+
+.stock-search-box input::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
+
+.stock-toolbar select {
+  width: 100%;
+  height: 48px;
+  padding: 0 46px 0 15px;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 12px;
+  outline: none;
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+  color-scheme: light;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 17px;
+}
+
+.stock-toolbar select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+.stock-search-box:hover,
+.stock-toolbar select:hover {
+  border-color: #f59e0b !important;
+}
+
+.stock-search-box:focus-within,
+.stock-toolbar select:focus {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15) !important;
+}
+
+/* =========================
+   TABLE HEADING
+========================= */
+
+.stock-table-heading {
+  margin: 26px 0 17px;
+}
+
+.stock-table-heading h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.stock-table-heading p {
+  margin: 6px 0 0;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* =========================
+   STOCK TABLE
+========================= */
+
+.stock-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  background: #ffffff;
+}
+
+.admin-stock-table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+}
+
+.admin-stock-table thead {
+  background: #0f172a;
+}
+
+.admin-stock-table th {
+  padding: 15px 14px;
+  background: #0f172a;
+  color: #e2e8f0;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.admin-stock-table td {
+  padding: 14px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.admin-stock-table tbody tr:hover td {
+  background: #f8fafc;
+}
+
+.admin-stock-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================
+   PRODUCT CELL
+========================= */
+
+.stock-product-cell {
+  min-width: 190px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stock-product-icon {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff7ed;
+  color: #f59e0b;
+  font-size: 19px;
+}
+
+.stock-product-cell strong {
+  display: block;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.stock-product-cell span {
+  display: block;
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.stock-current-value {
+  color: #0f172a;
+  font-size: 15px;
+}
+
+/* =========================
+   STATUS BADGES
+========================= */
+
+.stock-status-badge {
+  display: inline-flex;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.stock-status-badge.healthy {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.stock-status-badge.low {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.stock-status-badge.out {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* =========================
+   UPDATE INPUT
+========================= */
+
+.stock-update-input {
+  width: 105px;
+  height: 42px;
+  padding: 0 11px;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 10px;
+  outline: none;
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.stock-update-input:focus {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.14);
+}
+
+/* =========================
+   UPDATE BUTTON
+========================= */
+
+.stock-update-button {
+  min-width: 112px;
+  height: 42px;
+  padding: 0 13px;
+  border: none;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.stock-update-button:hover:not(:disabled) {
+  background: #f59e0b;
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.stock-update-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+
+.stock-empty-state {
+  padding: 58px 20px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 15px;
+  background: #f8fafc;
+  color: #94a3b8;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1050px) {
+  .stock-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .stock-toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 550px) {
+  .stock-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stock-management-panel {
+    padding: 17px;
+  }
+}

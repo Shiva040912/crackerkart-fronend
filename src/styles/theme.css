@@ -1,0 +1,505 @@
+:root {
+  --primary: #f6a609;
+  --primary-hover: #ffb21a;
+  --success: #22c55e;
+}
+
+/* =========================
+   LIGHT THEME
+========================= */
+
+body.light-theme {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+
+  --text: #111827;
+  --text-light: #64748b;
+
+  --border: #e5e7eb;
+  --shadow: 0 10px 25px rgba(15, 23, 42, .08);
+}
+
+/* =========================
+   DARK THEME
+========================= */
+
+body.dark-theme {
+  --bg: #0f172a;
+  --surface: #111827;
+  --surface-2: #1f2937;
+
+  --text: #ffffff;
+  --text-light: #94a3b8;
+
+  --border: #334155;
+  --shadow: 0 15px 35px rgba(0,0,0,.35);
+}
+
+/* =========================
+   GLOBAL
+========================= */
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  transition:.25s;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button{
+  font-family:inherit;
+}
+
+/* =========================
+   COMMON CARD
+========================= */
+
+.theme-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+}
+
+/* =========================
+   COMMON INPUT
+========================= */
+
+.theme-input{
+  background:var(--surface);
+  color:var(--text);
+  border:1px solid var(--border);
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+.theme-primary-btn{
+  background:var(--primary);
+  color:#111827;
+}
+
+.theme-primary-btn:hover{
+  background:var(--primary-hover);
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar{
+  background:var(--surface) !important;
+  border-bottom:1px solid var(--border);
+}
+
+.nav-brand-text h2,
+.nav-links a,
+.cart-btn,
+.nav-icon-btn,
+.profile-btn,
+.nav-dropdown-btn{
+  color:var(--text) !important;
+}
+
+.nav-brand-text p{
+  color:var(--text-light) !important;
+}
+
+.active-link{
+  color:var(--primary) !important;
+}
+
+.theme-toggle-btn{
+  background:var(--primary);
+  color:#111827;
+}
+
+/* =========================
+   COMMON TEXT
+========================= */
+
+.page-title{
+  color:var(--text);
+}
+
+.page-subtitle{
+  color:var(--text-light);
+}
+
+/* =========================
+   COMMON PRICE
+========================= */
+
+.price{
+  color:var(--success);
+  font-weight:900;
+}
+
+/* FORCE THEME APPLY TO ALL PAGES */
+
+.brands-page,
+.cart-page,
+.category-section,
+.checkout-page,
+.orders-page,
+.product-page,
+.quickbuy-page,
+.stats-section,
+.wishlist-page {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+.brand-card,
+.cart-card,
+.cart-items,
+.cart-summary,
+.category-card,
+.checkout-card,
+.checkout-summary,
+.order-card,
+.order-address-box,
+.customer-product-card,
+.filter-sidebar,
+.product-filter-panel,
+.product-search-box,
+.quickbuy-table,
+.quickbuy-summary,
+.quickbuy-search,
+.stat-card,
+.wishlist-card,
+.empty-cart,
+.empty-brands,
+.no-orders-box,
+.no-products-box,
+.empty-wishlist {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+/* CUSTOMER THEME INPUTS ONLY */
+
+.brands-page input,
+.brands-page textarea,
+.brands-page select,
+.cart-page input,
+.cart-page textarea,
+.cart-page select,
+.category-section input,
+.category-section textarea,
+.category-section select,
+.checkout-page input,
+.checkout-page textarea,
+.checkout-page select,
+.orders-page input,
+.orders-page textarea,
+.orders-page select,
+.product-page input,
+.product-page textarea,
+.product-page select,
+.quickbuy-page input,
+.quickbuy-page textarea,
+.quickbuy-page select,
+.wishlist-page input,
+.wishlist-page textarea,
+.wishlist-page select {
+  background: transparent;
+  color: var(--text) !important;
+}
+
+.product-search-box input,
+.quickbuy-search input,
+.checkout-input input,
+.checkout-input textarea {
+  color: var(--text) !important;
+}
+
+.brands-header h1,
+.cart-title-row h1,
+.section-title h2,
+.checkout-header h1,
+.orders-top h1,
+.product-hero h1,
+.quickbuy-top h1,
+.stats-header h2,
+.wishlist-header h1,
+.cart-info h2,
+.checkout-card-title h2,
+.checkout-summary h2,
+.order-main-row h3,
+.customer-product-content h3,
+.stat-card h3,
+.wishlist-content h3 {
+  color: var(--text) !important;
+}
+
+.brands-header span,
+.cart-info span,
+.section-title span,
+.checkout-header span,
+.checkout-summary p,
+.checkout-card-title p,
+.order-info-grid p,
+.order-address-box p,
+.product-result-info,
+.quickbuy-product p,
+.stat-card p,
+.wishlist-header span {
+  color: var(--text-light) !important;
+}
+
+
+/* LIGHT MODE FINAL FIX */
+
+body.light-theme .filter-sidebar select,
+body.light-theme .product-filter-panel select,
+body.light-theme .quickbuy-filters select {
+  background: #f8fafc !important;
+  color: #111827 !important;
+  border: 1px solid #dbe3ee !important;
+}
+
+body.light-theme .product-search-box,
+body.light-theme .quickbuy-search {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .product-image-box {
+  background: #f1f5f9 !important;
+}
+
+body.light-theme .product-image-box img,
+body.light-theme .quickbuy-product img {
+  object-fit: contain !important;
+  padding: 12px !important;
+}
+
+body.light-theme .customer-product-content h3,
+body.light-theme .cart-summary h2,
+body.light-theme .quickbuy-summary h2,
+body.light-theme .brand-card h3,
+body.light-theme .category-card h3 {
+  color: #0f172a !important;
+}
+
+body.light-theme .pack-info,
+body.light-theme .summary-row span,
+body.light-theme .summary-row strong,
+body.light-theme .quickbuy-row span,
+body.light-theme .brand-card p,
+body.light-theme .category-card p {
+  color: #64748b !important;
+}
+
+body.light-theme .quickbuy-head {
+  background: #1f2937 !important;
+  color: #cbd5e1 !important;
+}
+
+body.light-theme .quickbuy-row {
+  background: #ffffff !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .cart-summary,
+body.light-theme .quickbuy-summary {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .product-page {
+  padding-top: 48px !important;
+}
+
+body.light-theme .product-layout {
+  padding-top: 20px !important;
+}
+
+/* =========================
+   ADMIN FORM FIX
+========================= */
+
+body.light-theme .admin-content input,
+body.light-theme .admin-content textarea,
+body.light-theme .admin-content select,
+body.light-theme .admin-page input,
+body.light-theme .admin-page textarea,
+body.light-theme .admin-page select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  caret-color: #111827 !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.light-theme .admin-content input::placeholder,
+body.light-theme .admin-content textarea::placeholder,
+body.light-theme .admin-page input::placeholder,
+body.light-theme .admin-page textarea::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
+
+body.light-theme .admin-content select option,
+body.light-theme .admin-page select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+body.dark-theme .admin-content input,
+body.dark-theme .admin-content textarea,
+body.dark-theme .admin-content select,
+body.dark-theme .admin-page input,
+body.dark-theme .admin-page textarea,
+body.dark-theme .admin-page select {
+  background: #1f2937 !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  caret-color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+body.dark-theme .admin-content input::placeholder,
+body.dark-theme .admin-content textarea::placeholder,
+body.dark-theme .admin-page input::placeholder,
+body.dark-theme .admin-page textarea::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
+
+body.dark-theme .admin-content select option,
+body.dark-theme .admin-page select option {
+  background: #1f2937 !important;
+  color: #f8fafc !important;
+}
+
+
+/* =========================================
+   FINAL ADMIN LIGHT/DARK FORM OVERRIDE
+   KEEP THIS AT THE END OF theme.css
+========================================= */
+
+/* LIGHT MODE */
+
+body.light-theme .admin-sidebar ~ * input,
+body.light-theme .admin-sidebar ~ * textarea,
+body.light-theme .admin-sidebar ~ * select,
+body.light-theme .admin-layout input,
+body.light-theme .admin-layout textarea,
+body.light-theme .admin-layout select,
+body.light-theme .admin-main input,
+body.light-theme .admin-main textarea,
+body.light-theme .admin-main select,
+body.light-theme .admin-content input,
+body.light-theme .admin-content textarea,
+body.light-theme .admin-content select {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  caret-color: #111827 !important;
+  border-color: #cbd5e1 !important;
+  opacity: 1 !important;
+}
+
+body.light-theme .admin-sidebar ~ * input::placeholder,
+body.light-theme .admin-sidebar ~ * textarea::placeholder,
+body.light-theme .admin-layout input::placeholder,
+body.light-theme .admin-layout textarea::placeholder,
+body.light-theme .admin-main input::placeholder,
+body.light-theme .admin-main textarea::placeholder,
+body.light-theme .admin-content input::placeholder,
+body.light-theme .admin-content textarea::placeholder {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+  opacity: 1 !important;
+}
+
+body.light-theme .admin-sidebar ~ * select option,
+body.light-theme .admin-layout select option,
+body.light-theme .admin-main select option,
+body.light-theme .admin-content select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* DARK MODE */
+
+body.dark-theme .admin-sidebar ~ * input,
+body.dark-theme .admin-sidebar ~ * textarea,
+body.dark-theme .admin-sidebar ~ * select,
+body.dark-theme .admin-layout input,
+body.dark-theme .admin-layout textarea,
+body.dark-theme .admin-layout select,
+body.dark-theme .admin-main input,
+body.dark-theme .admin-main textarea,
+body.dark-theme .admin-main select,
+body.dark-theme .admin-content input,
+body.dark-theme .admin-content textarea,
+body.dark-theme .admin-content select {
+  background-color: #1f2937 !important;
+  background-image: none !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  caret-color: #f8fafc !important;
+  border-color: #475569 !important;
+  opacity: 1 !important;
+}
+
+body.dark-theme .admin-sidebar ~ * input::placeholder,
+body.dark-theme .admin-sidebar ~ * textarea::placeholder,
+body.dark-theme .admin-layout input::placeholder,
+body.dark-theme .admin-layout textarea::placeholder,
+body.dark-theme .admin-main input::placeholder,
+body.dark-theme .admin-main textarea::placeholder,
+body.dark-theme .admin-content input::placeholder,
+body.dark-theme .admin-content textarea::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+body.dark-theme .admin-sidebar ~ * select option,
+body.dark-theme .admin-layout select option,
+body.dark-theme .admin-main select option,
+body.dark-theme .admin-content select option {
+  background: #1f2937 !important;
+  color: #f8fafc !important;
+}
+
+/* CHROME AUTOFILL */
+
+body.light-theme .admin-sidebar ~ * input:-webkit-autofill,
+body.light-theme .admin-layout input:-webkit-autofill,
+body.light-theme .admin-main input:-webkit-autofill,
+body.light-theme .admin-content input:-webkit-autofill {
+  -webkit-text-fill-color: #111827 !important;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+}
+
+body.dark-theme .admin-sidebar ~ * input:-webkit-autofill,
+body.dark-theme .admin-layout input:-webkit-autofill,
+body.dark-theme .admin-main input:-webkit-autofill,
+body.dark-theme .admin-content input:-webkit-autofill {
+  -webkit-text-fill-color: #f8fafc !important;
+  -webkit-box-shadow: 0 0 0 1000px #1f2937 inset !important;
+  box-shadow: 0 0 0 1000px #1f2937 inset !important;
+}
+
+
+

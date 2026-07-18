@@ -1,0 +1,24 @@
+body.admin-theme {
+  background: #f8fafc !important;
+  color: #111827 !important;
+}
+
+body.admin-theme input,
+body.admin-theme textarea,
+body.admin-theme select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.admin-theme input::placeholder,
+body.admin-theme textarea::placeholder {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+}
+
+body.admin-theme select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}

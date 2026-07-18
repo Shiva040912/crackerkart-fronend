@@ -1,0 +1,136 @@
+.category-section {
+  padding: 75px 7%;
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 42px;
+}
+
+.section-title p {
+  margin: 0;
+  color: #f6a609;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.section-title h2 {
+  margin: 8px 0 10px;
+  font-size: 34px;
+  color: #ffffff;
+}
+
+.section-title span {
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.category-card {
+  background: #1f2937;
+  border: 1px solid #334155;
+  border-radius: 24px;
+  padding: 30px 24px;
+  text-align: center;
+  transition: 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+.category-card::before {
+  content: "";
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  background: rgba(246, 166, 9, 0.08);
+  border-radius: 50%;
+  top: -45px;
+  right: -45px;
+}
+
+.category-card:hover {
+  transform: translateY(-8px);
+  border-color: #f6a609;
+  box-shadow: 0 20px 45px rgba(246, 166, 9, 0.18);
+}
+
+.category-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  background: #0f172a;
+  color: #f6a609;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  border: 1px solid #334155;
+}
+
+.category-card h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  color: #ffffff;
+}
+
+.category-card p {
+  color: #94a3b8;
+  line-height: 1.6;
+  min-height: 50px;
+}
+
+.category-card button,
+.category-more-box button {
+  border: none;
+  background: #f6a609;
+  color: #111827;
+  padding: 11px 20px;
+  border-radius: 999px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: .25s;
+}
+
+.category-card button:hover,
+.category-more-box button:hover {
+  background: #ffb21a;
+  transform: translateY(-2px);
+}
+
+.category-more-box {
+  margin-top: 34px;
+  text-align: center;
+}
+
+.empty-category-text {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+@media (max-width:900px){
+  .category-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media (max-width:520px){
+  .category-grid{
+    grid-template-columns:1fr;
+  }
+
+  .section-title h2{
+    font-size:28px;
+  }
+}

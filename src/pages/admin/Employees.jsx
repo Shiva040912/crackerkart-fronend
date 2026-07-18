@@ -15,7 +15,7 @@ import toast from "react-hot-toast";
 import api from "../../api/axios";
 import AdminSidebar from "../../components/AdminSidebar";
 
-import "../../styles/adminCommon.css";
+import "../../styles/admincommon.css";
 import "../../styles/employees.css";
 
 const initialForm = {

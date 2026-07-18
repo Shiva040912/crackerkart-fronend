@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../../api/axios";
-import "../../styles/auth.css";
+import "../../styles/register.css";
 import toast from "react-hot-toast";
 
 

@@ -15,7 +15,7 @@ import toast from "react-hot-toast";
 import api from "../../api/axios";
 import AdminSidebar from "../../components/AdminSidebar";
 
-import "../../styles/admincommon.css";
+import "../../styles/adminCommon.css";
 import "../../styles/employees.css";
 
 const initialForm = {
@@ -36,20 +36,18 @@ const departmentLabels = {
 };
 
 const Employees = () => {
-  const adminUser = JSON.parse(
-    localStorage.getItem("adminUser") || "{}"
-  );
+  const adminUser = JSON.parse(localStorage.getItem("adminUser") || "{}");
 
   const [employees, setEmployees] = useState([]);
   const [form, setForm] = useState(initialForm);
 
   const [editingId, setEditingId] = useState(null);
-  const [search, setSearch] = useState("");
-  const [departmentFilter, setDepartmentFilter] =
-    useState("all");
+  const [showForm, setShowForm] = useState(false);
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [search, setSearch] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("all");
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -61,15 +59,10 @@ const Employees = () => {
       const response = await api.get("/employees");
 
       setEmployees(
-        Array.isArray(response.data?.employees)
-          ? response.data.employees
-          : []
+        Array.isArray(response.data?.employees) ? response.data.employees : [],
       );
     } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-          "Failed to load employees"
-      );
+      toast.error(error.response?.data?.message || "Failed to load employees");
     } finally {
       setLoading(false);
     }
@@ -88,24 +81,20 @@ const Employees = () => {
         employee.name?.toLowerCase().includes(query) ||
         employee.email?.toLowerCase().includes(query) ||
         employee.phone?.includes(query) ||
-        employee.department
-          ?.toLowerCase()
-          .includes(query);
+        employee.department?.toLowerCase().includes(query);
 
       const matchesDepartment =
-        departmentFilter === "all" ||
-        employee.department === departmentFilter;
+        departmentFilter === "all" || employee.department === departmentFilter;
 
       return matchesSearch && matchesDepartment;
     });
   }, [employees, search, departmentFilter]);
 
   const activeEmployees = employees.filter(
-    (employee) => employee.isActive
+    (employee) => employee.isActive,
   ).length;
 
-  const inactiveEmployees =
-    employees.length - activeEmployees;
+  const inactiveEmployees = employees.length - activeEmployees;
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -120,8 +109,8 @@ const Employees = () => {
     setForm(initialForm);
     setEditingId(null);
     setShowPassword(false);
+    setShowForm(false);
   };
-
   const validateForm = () => {
     if (!form.name.trim()) {
       toast.error("Staff name is required");
@@ -136,9 +125,7 @@ const Employees = () => {
     }
 
     if (!/^[6-9]\d{9}$/.test(form.phone.trim())) {
-      toast.error(
-        "Enter a valid 10 digit phone number"
-      );
+      toast.error("Enter a valid 10 digit phone number");
       return false;
     }
 
@@ -147,19 +134,13 @@ const Employees = () => {
       return false;
     }
 
-    if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-        form.email.trim()
-      )
-    ) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       toast.error("Enter a valid email address");
       return false;
     }
 
     if (!editingId && form.password.length < 8) {
-      toast.error(
-        "Password must contain at least 8 characters"
-      );
+      toast.error("Password must contain at least 8 characters");
       return false;
     }
 
@@ -183,26 +164,20 @@ const Employees = () => {
       setSaving(true);
 
       if (editingId) {
-        await api.patch(
-          `/employees/${editingId}`,
-          employeeData
-        );
+        await api.patch(`/employees/${editingId}`, employeeData);
 
-        toast.success(
-          "Employee updated successfully"
-        );
+        toast.success("Employee updated successfully");
       } else {
         await api.post("/employees", {
           ...employeeData,
           password: form.password,
         });
 
-        toast.success(
-          "Employee created successfully"
-        );
+        toast.success("Employee created successfully");
       }
 
       resetForm();
+      setShowForm(false);
       await loadEmployees();
     } catch (error) {
       const message = error.response?.data?.message;
@@ -210,8 +185,7 @@ const Employees = () => {
       toast.error(
         Array.isArray(message)
           ? message[0]
-          : message ||
-              "Employee action failed"
+          : message || "Employee action failed",
       );
     } finally {
       setSaving(false);
@@ -231,6 +205,7 @@ const Employees = () => {
     });
 
     setShowPassword(false);
+    setShowForm(true);
 
     window.scrollTo({
       top: 0,
@@ -240,43 +215,29 @@ const Employees = () => {
 
   const handleStatusToggle = async (employee) => {
     try {
-      await api.patch(
-        `/employees/${employee._id}`,
-        {
-          isActive: !employee.isActive,
-        }
-      );
+      await api.patch(`/employees/${employee._id}`, {
+        isActive: !employee.isActive,
+      });
 
       toast.success(
-        employee.isActive
-          ? "Employee deactivated"
-          : "Employee activated"
+        employee.isActive ? "Employee deactivated" : "Employee activated",
       );
 
       await loadEmployees();
     } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-          "Status update failed"
-      );
+      toast.error(error.response?.data?.message || "Status update failed");
     }
   };
 
   const handleDelete = async (employee) => {
-    const confirmed = window.confirm(
-      `Delete ${employee.name} permanently?`
-    );
+    const confirmed = window.confirm(`Delete ${employee.name} permanently?`);
 
     if (!confirmed) return;
 
     try {
-      await api.delete(
-        `/employees/${employee._id}`
-      );
+      await api.delete(`/employees/${employee._id}`);
 
-      toast.success(
-        "Employee deleted successfully"
-      );
+      toast.success("Employee deleted successfully");
 
       if (editingId === employee._id) {
         resetForm();
@@ -284,10 +245,7 @@ const Employees = () => {
 
       await loadEmployees();
     } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-          "Employee delete failed"
-      );
+      toast.error(error.response?.data?.message || "Employee delete failed");
     }
   };
 
@@ -299,29 +257,36 @@ const Employees = () => {
         <header className="admin-topbar">
           <div>
             <h1>Employee Management</h1>
-            <p>
-              Create and manage department staff
-              accounts.
-            </p>
+
+            <p>Create and manage department staff accounts.</p>
           </div>
 
-          <div className="admin-user-chip">
-            <span className="admin-user-avatar">
-              {(adminUser?.name || "S")
-                .charAt(0)
-                .toUpperCase()}
-            </span>
+          <div className="employee-header-actions">
+            <button
+              type="button"
+              className="employee-create-btn"
+              onClick={() => {
+                resetForm();
+                setShowForm(true);
+              }}
+            >
+              <FiUserPlus />
+              Create Employee
+            </button>
 
-            <div>
-              <strong>
-                {adminUser?.name || "Super Admin"}
-              </strong>
+            <div className="admin-user-chip">
+              <span className="admin-user-avatar">
+                {(adminUser?.name || "S").charAt(0).toUpperCase()}
+              </span>
 
-              <small>Super Administrator</small>
+              <div>
+                <strong>{adminUser?.name || "Super Admin"}</strong>
+
+                <small>Super Administrator</small>
+              </div>
             </div>
           </div>
         </header>
-
         <section className="employee-summary-grid">
           <article className="employee-summary-card">
             <span className="employee-summary-icon">
@@ -357,165 +322,144 @@ const Employees = () => {
           </article>
         </section>
 
-        <section className="employee-form-panel">
-          <div className="employee-panel-heading">
-            <div>
-              <h2>
-                {editingId
-                  ? "Edit Employee"
-                  : "Create Employee"}
-              </h2>
+        {showForm && (
+          <section className="employee-form-panel">
+            <div className="employee-panel-heading">
+              <div>
+                <h2>{editingId ? "Edit Employee" : "Create Employee"}</h2>
 
-              <p>
-                Enter staff details and assign a
-                department.
-              </p>
-            </div>
+                <p>Enter staff details and assign a department.</p>
+              </div>
 
-            {editingId && (
               <button
                 type="button"
                 className="employee-cancel-btn"
                 onClick={resetForm}
               >
                 <FiX />
-                Cancel Edit
+                {editingId ? "Cancel Edit" : "Close"}
               </button>
-            )}
-          </div>
-
-          <form
-            className="employee-form"
-            onSubmit={handleSubmit}
-          >
-            <div className="employee-form-group">
-              <label>Staff Name</label>
-
-              <input
-                type="text"
-                name="name"
-                placeholder="Enter staff name"
-                value={form.name}
-                onChange={handleChange}
-              />
             </div>
 
-            <div className="employee-form-group">
-              <label>Age</label>
-
-              <input
-                type="number"
-                name="age"
-                min="18"
-                max="65"
-                placeholder="Enter age"
-                value={form.age}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="employee-form-group">
-              <label>Contact Number</label>
-
-              <input
-                type="tel"
-                name="phone"
-                maxLength="10"
-                placeholder="Enter 10 digit number"
-                value={form.phone}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="employee-form-group">
-              <label>Department</label>
-
-              <select
-                name="department"
-                value={form.department}
-                onChange={handleChange}
-              >
-                <option value="">
-                  Select Department
-                </option>
-
-                <option value="admin">
-                  Admin Department
-                </option>
-
-                <option value="inventory">
-                  Inventory Department
-                </option>
-
-                <option value="orders">
-                  Orders Department
-                </option>
-
-                <option value="customer_support">
-                  Customer Support
-                </option>
-              </select>
-            </div>
-
-            <div className="employee-form-group">
-              <label>Email Address</label>
-
-              <input
-                type="email"
-                name="email"
-                placeholder="Enter staff email"
-                value={form.email}
-                onChange={handleChange}
-                autoComplete="off"
-              />
-            </div>
-
-            {!editingId && (
+            <form className="employee-form" onSubmit={handleSubmit}>
               <div className="employee-form-group">
-                <label>Password</label>
+                <label>Staff Name</label>
 
-                <div className="employee-password-box">
-                  <input
-                    type={
-                      "text"
-                    }
-                    name="password"
-                    placeholder="Minimum 8 characters"
-                    value={form.password}
-                    onChange={handleChange}
-                    autoComplete="new-password"
-                  />
-
-                  
-                </div>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Enter staff name"
+                  value={form.name}
+                  onChange={handleChange}
+                />
               </div>
-            )}
 
-            <button
-              type="submit"
-              className="employee-save-btn"
-              disabled={saving}
-            >
-              <FiUserPlus />
+              <div className="employee-form-group">
+                <label>Age</label>
 
-              {saving
-                ? "Saving..."
-                : editingId
-                  ? "Update Employee"
-                  : "Create Employee"}
-            </button>
-          </form>
-        </section>
+                <input
+                  type="number"
+                  name="age"
+                  min="18"
+                  max="65"
+                  placeholder="Enter age"
+                  value={form.age}
+                  onChange={handleChange}
+                />
+              </div>
 
+              <div className="employee-form-group">
+                <label>Contact Number</label>
+
+                <input
+                  type="tel"
+                  name="phone"
+                  maxLength="10"
+                  placeholder="Enter 10 digit number"
+                  value={form.phone}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="employee-form-group">
+                <label>Department</label>
+
+                <select
+                  name="department"
+                  value={form.department}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Department</option>
+
+                  <option value="admin">Admin Department</option>
+
+                  <option value="inventory">Inventory Department</option>
+
+                  <option value="orders">Orders Department</option>
+
+                  <option value="customer_support">Customer Support</option>
+                </select>
+              </div>
+
+              <div className="employee-form-group">
+                <label>Email Address</label>
+
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Enter staff email"
+                  value={form.email}
+                  onChange={handleChange}
+                  autoComplete="off"
+                />
+              </div>
+
+              {!editingId && (
+                <div className="employee-form-group">
+                  <label>Password</label>
+
+                  <div className="employee-password-box">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      placeholder="Minimum 8 characters"
+                      value={form.password}
+                      onChange={handleChange}
+                      autoComplete="new-password"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <FiEyeOff /> : <FiEye />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="employee-save-btn"
+                disabled={saving}
+              >
+                <FiUserPlus />
+
+                {saving
+                  ? "Saving..."
+                  : editingId
+                    ? "Update Employee"
+                    : "Create Employee"}
+              </button>
+            </form>
+          </section>
+        )}
         <section className="employee-list-panel">
           <div className="employee-list-header">
             <div>
               <h2>All Employees</h2>
 
-              <p>
-                {filteredEmployees.length} employees
-                shown
-              </p>
+              <p>{filteredEmployees.length} employees shown</p>
             </div>
 
             <div className="employee-filters">
@@ -526,51 +470,31 @@ const Employees = () => {
                   type="text"
                   placeholder="Search employees..."
                   value={search}
-                  onChange={(event) =>
-                    setSearch(event.target.value)
-                  }
+                  onChange={(event) => setSearch(event.target.value)}
                 />
               </div>
 
               <select
                 value={departmentFilter}
-                onChange={(event) =>
-                  setDepartmentFilter(
-                    event.target.value
-                  )
-                }
+                onChange={(event) => setDepartmentFilter(event.target.value)}
               >
-                <option value="all">
-                  All Departments
-                </option>
+                <option value="all">All Departments</option>
 
-                <option value="admin">
-                  Admin
-                </option>
+                <option value="admin">Admin</option>
 
-                <option value="inventory">
-                  Inventory
-                </option>
+                <option value="inventory">Inventory</option>
 
-                <option value="orders">
-                  Orders
-                </option>
+                <option value="orders">Orders</option>
 
-                <option value="customer_support">
-                  Customer Support
-                </option>
+                <option value="customer_support">Customer Support</option>
               </select>
             </div>
           </div>
 
           {loading ? (
-            <div className="employee-empty-state">
-              Loading employees...
-            </div>
+            <div className="employee-empty-state">Loading employees...</div>
           ) : filteredEmployees.length === 0 ? (
-            <div className="employee-empty-state">
-              No employees found
-            </div>
+            <div className="employee-empty-state">No employees found</div>
           ) : (
             <div className="employee-table-wrapper">
               <table className="employee-table">
@@ -587,86 +511,66 @@ const Employees = () => {
                 </thead>
 
                 <tbody>
-                  {filteredEmployees.map(
-                    (employee) => (
-                      <tr key={employee._id}>
-                        <td>
-                          <div className="employee-name-cell">
-                            <span>
-                              {(employee.name || "E")
-                                .charAt(0)
-                                .toUpperCase()}
-                            </span>
-
-                            <strong>
-                              {employee.name}
-                            </strong>
-                          </div>
-                        </td>
-
-                        <td>{employee.age}</td>
-
-                        <td>
-                          <span className="employee-department-badge">
-                            {departmentLabels[
-                              employee.department
-                            ] ||
-                              employee.department}
+                  {filteredEmployees.map((employee) => (
+                    <tr key={employee._id}>
+                      <td>
+                        <div className="employee-name-cell">
+                          <span>
+                            {(employee.name || "E").charAt(0).toUpperCase()}
                           </span>
-                        </td>
 
-                        <td>{employee.email}</td>
+                          <strong>{employee.name}</strong>
+                        </div>
+                      </td>
 
-                        <td>{employee.phone}</td>
+                      <td>{employee.age}</td>
 
-                        <td>
+                      <td>
+                        <span className="employee-department-badge">
+                          {departmentLabels[employee.department] ||
+                            employee.department}
+                        </span>
+                      </td>
+
+                      <td>{employee.email}</td>
+
+                      <td>{employee.phone}</td>
+
+                      <td>
+                        <button
+                          type="button"
+                          className={`employee-status-btn ${
+                            employee.isActive ? "active" : "inactive"
+                          }`}
+                          onClick={() => handleStatusToggle(employee)}
+                        >
+                          {employee.isActive ? "Active" : "Inactive"}
+                        </button>
+                      </td>
+
+                      <td>
+                        <div className="employee-actions">
                           <button
                             type="button"
-                            className={`employee-status-btn ${
-                              employee.isActive
-                                ? "active"
-                                : "inactive"
-                            }`}
-                            onClick={() =>
-                              handleStatusToggle(
-                                employee
-                              )
-                            }
+                            className="employee-edit-btn"
+                            onClick={() => handleEdit(employee)}
                           >
-                            {employee.isActive
-                              ? "Active"
-                              : "Inactive"}
+                            <FiEdit2 />
+                            Edit
                           </button>
-                        </td>
 
-                        <td>
-                          <div className="employee-actions">
-                            <button
-                              type="button"
-                              className="employee-edit-btn"
-                              onClick={() =>
-                                handleEdit(employee)
-                              }
-                            >
-                              <FiEdit2 />
-                              Edit
-                            </button>
-
-                            <button
-                              type="button"
-                              className="employee-delete-btn"
-                              onClick={() =>
-                                handleDelete(employee)
-                              }
-                            >
-                              <FiTrash2 />
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  )}
+                          <button
+                            type="button"
+                            className="employee-delete-btn"
+                            onClick={() => handleDelete(employee)}
+                          >
+                            <FiTrash2 />
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

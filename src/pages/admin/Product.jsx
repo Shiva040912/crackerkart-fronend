@@ -9,6 +9,8 @@ import {
   FiTrash2,
   FiX,
 } from "react-icons/fi";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+
 import toast from "react-hot-toast";
 
 import socket from "../../service/socket";
@@ -18,11 +20,10 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-  
 } from "../../api/product";
 
-import "../../styles/admincommon.css";
-import "../../styles/adminproduct.css";
+import "../../styles/adminCommon.css";
+import "../../styles/adminProduct.css";
 import defaultProductImage from "../../assets/image.jpeg";
 import AdminSidebar from "../../components/AdminSidebar";
 
@@ -41,7 +42,7 @@ const Product = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
-  
+  const [reordering, setReordering] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -137,8 +138,6 @@ const Product = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-
-  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -272,6 +271,70 @@ const Product = () => {
     });
   }, [products, search, categoryFilter, statusFilter]);
 
+  const canReorder = search.trim() === "" && statusFilter === "all";
+
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+
+    if (!canReorder) {
+      toast.error("Search and status filters clear pannitu drag pannu");
+      return;
+    }
+
+    if (result.source.index === result.destination.index) {
+      return;
+    }
+
+    const reorderedProducts = Array.from(filteredProducts);
+
+    const [movedProduct] = reorderedProducts.splice(result.source.index, 1);
+
+    reorderedProducts.splice(result.destination.index, 0, movedProduct);
+
+    const reorderedWithPosition = reorderedProducts.map((product, index) => ({
+      ...product,
+      displayOrder: index + 1,
+    }));
+
+    const reorderedMap = new Map(
+      reorderedWithPosition.map((product) => [product._id, product]),
+    );
+
+    setProducts((currentProducts) => {
+      if (categoryFilter === "all") {
+        return reorderedWithPosition;
+      }
+
+      const updatedProducts = currentProducts.map(
+        (product) => reorderedMap.get(product._id) || product,
+      );
+
+      return [...updatedProducts].sort(
+        (firstProduct, secondProduct) =>
+          Number(firstProduct.displayOrder || 0) -
+          Number(secondProduct.displayOrder || 0),
+      );
+    });
+
+    try {
+      setReordering(true);
+
+      await api.patch("/products/reorder", {
+        categoryId: categoryFilter,
+        productIds: reorderedWithPosition.map((product) => product._id),
+      });
+
+      toast.success("Product order updated");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Product order update failed",
+      );
+
+      await fetchProducts();
+    } finally {
+      setReordering(false);
+    }
+  };
   const activeProducts = products.filter((product) => product.isActive).length;
 
   const lowStockProducts = products.filter(
@@ -299,9 +362,6 @@ const Product = () => {
     toast.success("Admin logged out");
     navigate("/admin/login");
   };
-
-  
-
   return (
     <div className="admin-layout">
       <AdminSidebar />
@@ -333,10 +393,6 @@ const Product = () => {
               <FiPlus />
               Add Product
             </button>
-
-            
-
-            
           </div>
         </header>
 
@@ -435,133 +491,175 @@ const Product = () => {
             <div className="product-empty-state">No products found</div>
           ) : (
             <div className="product-table-wrapper">
-              <table className="admin-product-table">
-                <thead>
-                  <tr>
-                    <th>Image</th>
-                    <th>Product</th>
-                    <th>Brand</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Status</th>
-                    <th>Features</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredProducts.map((product) => (
-                    <tr key={product._id}>
-                      <td>
-                        <img
-                          className="product-table-image"
-                          src={product.imageUrl || defaultProductImage}
-                          alt={product.name}
-                          onError={(event) => {
-                            event.currentTarget.src = defaultProductImage;
-                          }}
-                        />
-                      </td>
-
-                      <td>
-                        <div className="product-name-cell">
-                          <strong>{product.name}</strong>
-
-                          <span>
-                            {product.packQuantity || 1}{" "}
-                            {product.unit || "Piece"} /{" "}
-                            {product.packType || "Single"}
-                          </span>
-                        </div>
-                      </td>
-
-                      <td>{product.brand || "-"}</td>
-
-                      <td>{product.category?.name || "No Category"}</td>
-
-                      <td>
-                        <strong className="product-price">
-                          ₹{Number(product.price || 0)}
-                        </strong>
-                      </td>
-
-                      <td>
-                        <span
-                          className={`product-stock-badge ${getStockClass(
-                            product.stock,
-                          )}`}
-                        >
-                          {product.stock}
-                        </span>
-                      </td>
-
-                      <td>
-                        <button
-                          type="button"
-                          className={`product-status-button ${
-                            product.isActive ? "active" : "inactive"
-                          }`}
-                          onClick={() => handleStatusToggle(product)}
-                        >
-                          {product.isActive ? "Active" : "Inactive"}
-                        </button>
-                      </td>
-
-                      <td>
-                        <div className="product-feature-list">
-                          {Number(product.discount) > 0 && (
-                            <span className="discount">
-                              {product.discount}% OFF
-                            </span>
-                          )}
-
-                          {product.isBestSeller && (
-                            <span className="best-seller">Best Seller</span>
-                          )}
-
-                          {product.isNewArrival && (
-                            <span className="new-arrival">New</span>
-                          )}
-
-                          {product.festivalOffer && (
-                            <span className="festival">Festival</span>
-                          )}
-
-                          {!product.discount &&
-                            !product.isBestSeller &&
-                            !product.isNewArrival &&
-                            !product.festivalOffer && (
-                              <span className="no-feature">-</span>
-                            )}
-                        </div>
-                      </td>
-
-                      <td>
-                        <div className="product-action-buttons">
-                          <button
-                            type="button"
-                            className="product-edit-button"
-                            title="Edit Product"
-                            onClick={() => handleEdit(product)}
-                          >
-                            <FiEdit2 />
-                          </button>
-
-                          <button
-                            type="button"
-                            className="product-delete-button"
-                            title="Delete Product"
-                            onClick={() => handleDelete(product._id)}
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </div>
-                      </td>
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <table className="admin-product-table">
+                  <thead>
+                    <tr>
+                      <th>Image</th>
+                      <th>Product</th>
+                      <th>Brand</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Stock</th>
+                      <th>Status</th>
+                      <th>Features</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+
+                  <Droppable droppableId="product-list">
+                    {(provided) => (
+                      <tbody
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                      >
+                        {filteredProducts.map((product, index) => (
+                          <Draggable
+                            key={product._id}
+                            draggableId={String(product._id)}
+                            index={index}
+                            isDragDisabled={!canReorder || reordering}
+                          >
+                            {(provided, snapshot) => (
+                              <tr
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                style={{
+                                  ...provided.draggableProps.style,
+                                  opacity: snapshot.isDragging ? 0.85 : 1,
+                                  cursor:
+                                    canReorder && !reordering
+                                      ? "grab"
+                                      : "default",
+                                }}
+                                className={
+                                  snapshot.isDragging
+                                    ? "product-row-dragging"
+                                    : ""
+                                }
+                              >
+                                <td>
+                                  <img
+                                    className="product-table-image"
+                                    src={
+                                      product.imageUrl || defaultProductImage
+                                    }
+                                    alt={product.name}
+                                    onError={(event) => {
+                                      event.currentTarget.src =
+                                        defaultProductImage;
+                                    }}
+                                  />
+                                </td>
+
+                                <td>
+                                  <div className="product-name-cell">
+                                    <strong>{product.name}</strong>
+
+                                    <span>
+                                      {product.packQuantity || 1}{" "}
+                                      {product.unit || "Piece"} /{" "}
+                                      {product.packType || "Single"}
+                                    </span>
+                                  </div>
+                                </td>
+
+                                <td>{product.brand || "-"}</td>
+
+                                <td>
+                                  {product.category?.name || "No Category"}
+                                </td>
+
+                                <td>
+                                  <strong className="product-price">
+                                    ₹{Number(product.price || 0)}
+                                  </strong>
+                                </td>
+
+                                <td>
+                                  <span
+                                    className={`product-stock-badge ${getStockClass(
+                                      product.stock,
+                                    )}`}
+                                  >
+                                    {product.stock}
+                                  </span>
+                                </td>
+
+                                <td>
+                                  <button
+                                    type="button"
+                                    className={`product-status-button ${
+                                      product.isActive ? "active" : "inactive"
+                                    }`}
+                                    onClick={() => handleStatusToggle(product)}
+                                  >
+                                    {product.isActive ? "Active" : "Inactive"}
+                                  </button>
+                                </td>
+
+                                <td>
+                                  <div className="product-feature-list">
+                                    {Number(product.discount) > 0 && (
+                                      <span className="discount">
+                                        {product.discount}% OFF
+                                      </span>
+                                    )}
+
+                                    {product.isBestSeller && (
+                                      <span className="best-seller">
+                                        Best Seller
+                                      </span>
+                                    )}
+
+                                    {product.isNewArrival && (
+                                      <span className="new-arrival">New</span>
+                                    )}
+
+                                    {product.festivalOffer && (
+                                      <span className="festival">Festival</span>
+                                    )}
+
+                                    {!product.discount &&
+                                      !product.isBestSeller &&
+                                      !product.isNewArrival &&
+                                      !product.festivalOffer && (
+                                        <span className="no-feature">-</span>
+                                      )}
+                                  </div>
+                                </td>
+
+                                <td>
+                                  <div className="product-action-buttons">
+                                    <button
+                                      type="button"
+                                      className="product-edit-button"
+                                      onClick={() => handleEdit(product)}
+                                    >
+                                      <FiEdit2 />
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      className="product-delete-button"
+                                      onClick={() => handleDelete(product._id)}
+                                    >
+                                      <FiTrash2 />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </Draggable>
+                        ))}
+
+                        {provided.placeholder}
+                      </tbody>
+                    )}
+                  </Droppable>
+                </table>
+              </DragDropContext>
             </div>
           )}
         </section>

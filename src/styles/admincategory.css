@@ -481,3 +481,38 @@ body.light-theme .category-card-content p {
   -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
   box-shadow: 0 0 0 1000px #ffffff inset !important;
 }
+
+.category-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.category-add-button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 12px;
+  background: #f59e0b;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: .25s;
+}
+
+.category-add-button:hover {
+  background: #d97706;
+  color: #fff;
+}
+
+@media (max-width:650px){
+  .category-header-actions{
+    width:100%;
+    flex-direction:column-reverse;
+    align-items:stretch;
+  }
+
+  .category-add-button{
+    width:100%;
+  }
+}

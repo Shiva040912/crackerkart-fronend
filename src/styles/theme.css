@@ -503,3 +503,28 @@ body.dark-theme .admin-content input:-webkit-autofill {
 
 
 
+/* CUSTOMER PRODUCT DROPDOWN OPTION FIX */
+
+body.light-theme .product-page select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+body.light-theme .product-page select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+body.dark-theme .product-page select {
+  background: #1f2937 !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+body.dark-theme .product-page select option {
+  background: #1f2937 !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}

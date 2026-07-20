@@ -29,42 +29,132 @@ function Checkout() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
     setError("");
-    setDeliveryAddress({
-      ...deliveryAddress,
-      [e.target.name]: e.target.value,
-    });
+
+    let cleanedValue = value;
+
+    if (name === "fullName" || name === "city") {
+      cleanedValue = value
+        .replace(/[^A-Za-z\s]/g, "")
+        .replace(/\s{2,}/g, " ");
+    }
+
+    if (name === "phone") {
+      cleanedValue = value.replace(/\D/g, "").slice(0, 10);
+    }
+
+    if (name === "pincode") {
+      cleanedValue = value.replace(/\D/g, "").slice(0, 6);
+    }
+
+    if (name === "address") {
+      cleanedValue = value.slice(0, 200);
+    }
+
+    setDeliveryAddress((currentAddress) => ({
+      ...currentAddress,
+      [name]: cleanedValue,
+    }));
   };
 
   const validateAddress = () => {
-    if (!deliveryAddress.fullName.trim()) {
+    const fullName = deliveryAddress.fullName.trim();
+    const phone = deliveryAddress.phone.trim();
+    const address = deliveryAddress.address.trim();
+    const city = deliveryAddress.city.trim();
+    const pincode = deliveryAddress.pincode.trim();
+
+    if (!fullName) {
       setError("Full name is required");
       return false;
     }
 
-    if (!/^[0-9]{10}$/.test(deliveryAddress.phone)) {
-      setError("Enter valid 10 digit phone number");
+    if (fullName.length < 3) {
+      setError("Full name must contain at least 3 characters");
       return false;
     }
 
-    if (!deliveryAddress.address.trim()) {
+    if (fullName.length > 50) {
+      setError("Full name cannot exceed 50 characters");
+      return false;
+    }
+
+    if (!/^[A-Za-z]+(?:\s[A-Za-z]+)*$/.test(fullName)) {
+      setError("Full name must contain letters and spaces only");
+      return false;
+    }
+
+    if (!phone) {
+      setError("Phone number is required");
+      return false;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      setError("Enter a valid 10 digit Indian phone number");
+      return false;
+    }
+
+    if (!address) {
       setError("Address is required");
       return false;
     }
 
-    if (!deliveryAddress.city.trim()) {
+    if (address.length < 10) {
+      setError("Address must contain at least 10 characters");
+      return false;
+    }
+
+    if (address.length > 200) {
+      setError("Address cannot exceed 200 characters");
+      return false;
+    }
+
+    if (!city) {
       setError("City is required");
       return false;
     }
 
-    if (!/^[0-9]{6}$/.test(deliveryAddress.pincode)) {
-      setError("Enter valid 6 digit pincode");
+    if (city.length < 2) {
+      setError("City name must contain at least 2 characters");
       return false;
     }
+
+    if (city.length > 40) {
+      setError("City name cannot exceed 40 characters");
+      return false;
+    }
+
+    if (!/^[A-Za-z]+(?:\s[A-Za-z]+)*$/.test(city)) {
+      setError("City name must contain letters and spaces only");
+      return false;
+    }
+
+    if (!pincode) {
+      setError("Pincode is required");
+      return false;
+    }
+
+    if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+      setError("Enter a valid 6 digit pincode");
+      return false;
+    }
+
+    setDeliveryAddress({
+      fullName,
+      phone,
+      address,
+      city,
+      pincode,
+    });
 
     return true;
   };
@@ -81,10 +171,11 @@ function Checkout() {
       setLoading(true);
       setError("");
 
-      const paymentRes = await createPayment({ deliveryAddress });
-      const paymentData = paymentRes.data;
+      const paymentRes = await createPayment({
+        deliveryAddress,
+      });
 
-      console.log("PAYMENT DATA:", paymentData);
+      const paymentData = paymentRes.data;
 
       const options = {
         key: paymentData.key,
@@ -103,12 +194,17 @@ function Checkout() {
               deliveryAddress,
             });
 
+            window.dispatchEvent(new Event("cartUpdated"));
+
             navigate("/orders");
           } catch (err) {
-            console.log(err);
+            console.log("Payment verification error:", err);
+
             setError(
               err.response?.data?.message || "Payment verification failed",
             );
+
+            setLoading(false);
           }
         },
 
@@ -131,17 +227,21 @@ function Checkout() {
       const razorpay = new window.Razorpay(options);
 
       razorpay.on("payment.failed", function (response) {
-        console.log("RAZORPAY FAILED:", response.error);
+        console.log("Razorpay payment failed:", response.error);
+
         setError(
           response.error?.description || "Payment failed. Please try again.",
         );
+
         setLoading(false);
       });
 
       razorpay.open();
     } catch (err) {
-      console.log(err);
+      console.log("Create payment error:", err);
+
       setError(err.response?.data?.message || "Unable to create payment");
+
       setLoading(false);
     }
   };
@@ -153,13 +253,16 @@ function Checkout() {
       setLoading(true);
       setError("");
 
-      await testPayment({ deliveryAddress });
+      await testPayment({
+        deliveryAddress,
+      });
 
       window.dispatchEvent(new Event("cartUpdated"));
 
       navigate("/orders");
     } catch (err) {
-      console.log(err);
+      console.log("Test payment error:", err);
+
       setError(err.response?.data?.message || "Test payment failed");
     } finally {
       setLoading(false);
@@ -173,89 +276,135 @@ function Checkout() {
       <main className="checkout-page">
         <section className="checkout-header">
           <p>Secure Checkout</p>
+
           <h1>Complete Your Order</h1>
-          <span>Enter your delivery details and continue to payment.</span>
+
+          <span>
+            Enter your delivery details and continue to payment.
+          </span>
         </section>
 
         <section className="checkout-layout">
           <div className="checkout-card">
             <div className="checkout-card-title">
               <FiMapPin />
+
               <div>
                 <h2>Delivery Address</h2>
+
                 <p>We will deliver your order to this address.</p>
               </div>
             </div>
 
-            {error && <div className="checkout-error">{error}</div>}
+            {error && (
+              <div className="checkout-error">
+                {error}
+              </div>
+            )}
 
             <div className="checkout-form-grid">
               <div className="checkout-form-group">
-                <label>Full Name</label>
+                <label htmlFor="fullName">Full Name</label>
+
                 <div className="checkout-input">
                   <FiUser />
+
                   <input
+                    id="fullName"
                     type="text"
                     name="fullName"
                     placeholder="Enter full name"
                     value={deliveryAddress.fullName}
                     onChange={handleChange}
+                    minLength={3}
+                    maxLength={50}
+                    autoComplete="name"
                   />
                 </div>
               </div>
 
               <div className="checkout-form-group">
-                <label>Phone Number</label>
+                <label htmlFor="phone">Phone Number</label>
+
                 <div className="checkout-input">
                   <FiPhone />
+
                   <input
-                    type="text"
+                    id="phone"
+                    type="tel"
                     name="phone"
                     placeholder="10 digit phone number"
                     value={deliveryAddress.phone}
                     onChange={handleChange}
+                    inputMode="numeric"
+                    pattern="[6-9][0-9]{9}"
+                    maxLength={10}
+                    autoComplete="tel"
                   />
                 </div>
               </div>
 
               <div className="checkout-form-group full-width">
-                <label>Address</label>
+                <label htmlFor="address">Address</label>
+
                 <div className="checkout-input textarea-input">
                   <FiHome />
+
                   <textarea
+                    id="address"
                     rows="4"
                     name="address"
-                    placeholder="House no, street, area"
+                    placeholder="House number, street, area and landmark"
                     value={deliveryAddress.address}
                     onChange={handleChange}
+                    minLength={10}
+                    maxLength={200}
+                    autoComplete="street-address"
                   />
                 </div>
+
+                <small>
+                  {deliveryAddress.address.length}/200 characters
+                </small>
               </div>
 
               <div className="checkout-form-group">
-                <label>City</label>
+                <label htmlFor="city">City</label>
+
                 <div className="checkout-input">
                   <FiMapPin />
+
                   <input
+                    id="city"
                     type="text"
                     name="city"
                     placeholder="Enter city"
                     value={deliveryAddress.city}
                     onChange={handleChange}
+                    minLength={2}
+                    maxLength={40}
+                    autoComplete="address-level2"
                   />
                 </div>
               </div>
 
               <div className="checkout-form-group">
-                <label>Pincode</label>
+                <label htmlFor="pincode">Pincode</label>
+
                 <div className="checkout-input">
                   <FiMapPin />
+
                   <input
+                    id="pincode"
                     type="text"
                     name="pincode"
                     placeholder="6 digit pincode"
                     value={deliveryAddress.pincode}
                     onChange={handleChange}
+                    inputMode="numeric"
+                    pattern="[1-9][0-9]{5}"
+                    maxLength={6}
+                    autoComplete="postal-code"
                   />
                 </div>
               </div>
@@ -268,6 +417,7 @@ function Checkout() {
             </div>
 
             <h2>Payment</h2>
+
             <p>
               Your final amount will be calculated securely from your cart.
               Delivery is free above ₹1000.
@@ -275,10 +425,14 @@ function Checkout() {
 
             <div className="secure-box">
               <FiShield />
-              <span>100% secure payment powered by Razorpay</span>
+
+              <span>
+                100% secure payment powered by Razorpay
+              </span>
             </div>
 
             <button
+              type="button"
               className="pay-now-btn"
               onClick={handlePayment}
               disabled={loading}
@@ -287,6 +441,7 @@ function Checkout() {
             </button>
 
             <button
+              type="button"
               className="test-pay-btn"
               onClick={handleTestPayment}
               disabled={loading}

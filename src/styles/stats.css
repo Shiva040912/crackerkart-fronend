@@ -1,77 +1,347 @@
+/* =========================================
+   STATS SECTION
+========================================= */
+
 .stats-section {
-  padding: 70px 7%;
-  background: #0f172a;
+  position: relative;
+  padding: 76px 6%;
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(245, 158, 11, 0.12),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(251, 191, 36, 0.07),
+      transparent 30%
+    ),
+    #0f172a;
 }
 
+.stats-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 6%;
+  right: 6%;
+  height: 1px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(245, 158, 11, 0.55),
+    transparent
+  );
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
 .stats-header {
+  position: relative;
+  z-index: 1;
+
+  max-width: 680px;
+  margin: 0 auto 38px;
+
   text-align: center;
-  margin-bottom: 35px;
 }
 
 .stats-header p {
+  margin: 0;
+
   color: #f59e0b;
+
+  font-size: 12px;
   font-weight: 900;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
 }
 
 .stats-header h2 {
-  margin: 8px 0 0;
+  margin: 9px 0 0;
+
   color: #ffffff;
-  font-size: 34px;
+
+  font-size: clamp(30px, 3vw, 40px);
+  font-weight: 950;
+  line-height: 1.15;
+  letter-spacing: -0.8px;
 }
 
+/* =========================================
+   GRID
+========================================= */
+
 .stats-grid {
+  position: relative;
+  z-index: 1;
+
+  max-width: 1200px;
+  margin: 0 auto;
+
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
 }
 
+/* =========================================
+   CARD
+========================================= */
+
 .stat-card {
-  background: #111827;
-  border: 1px solid #334155;
+  position: relative;
+  min-height: 205px;
+  padding: 28px 20px;
+
+  border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 22px;
-  padding: 28px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background: linear-gradient(
+    145deg,
+    rgba(30, 41, 59, 0.96),
+    rgba(15, 23, 42, 0.98)
+  );
+
   text-align: center;
-  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.28);
-  transition: 0.25s ease;
+
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: -45px;
+  right: -45px;
+
+  width: 110px;
+  height: 110px;
+
+  border-radius: 50%;
+
+  background: rgba(245, 158, 11, 0.08);
+
+  transition: transform 0.3s ease;
 }
 
 .stat-card:hover {
   transform: translateY(-7px);
-  border-color: #f59e0b;
+
+  border-color: rgba(245, 158, 11, 0.85);
+
+  box-shadow:
+    0 22px 46px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(245, 158, 11, 0.08);
 }
+
+.stat-card:hover::before {
+  transform: scale(1.25);
+}
+
+/* =========================================
+   ICON
+========================================= */
 
 .stat-icon {
-  font-size: 34px;
+  position: relative;
+  z-index: 1;
+
+  width: 58px;
+  height: 58px;
+  margin-bottom: 15px;
+  padding: 14px;
+
+  border: 1px solid rgba(245, 158, 11, 0.38);
+  border-radius: 18px;
+
+  background: rgba(245, 158, 11, 0.12);
   color: #f59e0b;
-  margin-bottom: 12px;
+
+  font-size: 30px;
+
+  box-shadow: 0 10px 24px rgba(245, 158, 11, 0.1);
 }
 
+/* =========================================
+   TEXT
+========================================= */
+
 .stat-card h3 {
-  margin: 0 0 8px;
-  color: #f0f3f2;
-  font-size: 28px;
+  position: relative;
+  z-index: 1;
+
+  margin: 0 0 7px;
+
+  color: #ffffff;
+
+  font-size: 29px;
+  font-weight: 950;
+  line-height: 1;
 }
 
 .stat-card p {
+  position: relative;
+  z-index: 1;
+
   margin: 0;
+
   color: #94a3b8;
+
+  font-size: 14px;
   font-weight: 700;
+  line-height: 1.4;
 }
 
+/* =========================================
+   TABLET
+========================================= */
+
 @media (max-width: 900px) {
+  .stats-section {
+    padding: 62px 5%;
+  }
+
+  .stats-header {
+    margin-bottom: 30px;
+  }
+
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .stat-card {
+    min-height: 190px;
   }
 }
 
-@media (max-width: 520px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+  .stats-section {
+    padding: 48px 14px;
+  }
+
+  .stats-section::before {
+    left: 14px;
+    right: 14px;
+  }
+
+  .stats-header {
+    margin-bottom: 24px;
+  }
+
+  .stats-header p {
+    font-size: 10px;
+    letter-spacing: 1.4px;
   }
 
   .stats-header h2 {
-    font-size: 28px;
+    max-width: 320px;
+    margin: 7px auto 0;
+
+    font-size: 25px;
+    line-height: 1.2;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+  }
+
+  .stat-card {
+    min-height: 155px;
+    padding: 18px 8px;
+
+    border-radius: 17px;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .stat-icon {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 11px;
+    padding: 11px;
+
+    border-radius: 14px;
+
+    font-size: 24px;
+  }
+
+  .stat-card h3 {
+    margin-bottom: 6px;
+
+    font-size: 22px;
+  }
+
+  .stat-card p {
+    max-width: 120px;
+
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .stat-card::before {
+    top: -50px;
+    right: -50px;
+
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 360px) {
+  .stats-section {
+    padding-inline: 10px;
+  }
+
+  .stats-grid {
+    gap: 8px;
+  }
+
+  .stat-card {
+    min-height: 145px;
+    padding: 15px 6px;
+  }
+
+  .stat-icon {
+    width: 42px;
+    height: 42px;
+    padding: 10px;
+  }
+
+  .stat-card h3 {
+    font-size: 20px;
+  }
+
+  .stat-card p {
+    font-size: 10px;
   }
 }

@@ -10,8 +10,8 @@ import {
   FiGrid,
   FiList,
   FiHeart,
+  FiFilter,
 } from "react-icons/fi";
-
 import api from "../api/axios";
 import {
   addToCart,
@@ -24,7 +24,7 @@ import {
   addToWishlist,
   removeFromWishlist,
 } from "../api/wishlist";
-import defaultImage from '../assets/image.jpeg'
+import defaultImage from "../assets/image.jpeg";
 import socket from "../service/socket";
 import "../styles/products.css";
 
@@ -45,11 +45,10 @@ const ProductSection = () => {
   const [packFilter, setPackFilter] = useState("all");
   const [sortBy, setSortBy] = useState("latest");
   const [viewMode, setViewMode] = useState("grid");
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const productsPerPage = 10;
-
- 
 
   const fetchProducts = async () => {
     try {
@@ -151,7 +150,7 @@ const ProductSection = () => {
     if (isWishlisted(productId)) {
       await removeFromWishlist(productId);
       setWishlist((prev) =>
-        prev.filter((item) => item.product?._id !== productId)
+        prev.filter((item) => item.product?._id !== productId),
       );
     } else {
       await addToWishlist(productId);
@@ -179,8 +178,8 @@ const ProductSection = () => {
       prev.map((item) =>
         item._id === cartItem._id
           ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
+          : item,
+      ),
     );
 
     window.dispatchEvent(new Event("cartUpdated"));
@@ -200,8 +199,8 @@ const ProductSection = () => {
         prev.map((item) =>
           item._id === cartItem._id
             ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
+            : item,
+        ),
       );
     }
 
@@ -277,7 +276,7 @@ const ProductSection = () => {
   const startIndex = (currentPage - 1) * productsPerPage;
   const currentProducts = filteredProducts.slice(
     startIndex,
-    startIndex + productsPerPage
+    startIndex + productsPerPage,
   );
 
   const getStockText = (stock) => {
@@ -286,286 +285,358 @@ const ProductSection = () => {
     return "In Stock";
   };
 
-  return (
-    <section className="product-page">
-      <div className="product-hero">
-        <p>Premium Fireworks Store</p>
-        <h1>Popular Pattasu Collections</h1>
-        <span>Choose safe and celebration-ready fireworks.</span>
+ return (
+  <section className="product-page">
+    <div className="product-hero">
+      <p>Premium Fireworks Store</p>
+      <h1>Popular Pattasu Collections</h1>
+      <span>Choose safe and celebration-ready fireworks.</span>
+    </div>
+
+    <div className="product-filter-panel">
+      <div className="product-search-box">
+        <FiSearch className="search-icon" />
+
+        <input
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
+        />
+
+        {search && (
+          <button onClick={() => setSearch("")}>
+            <FiX />
+          </button>
+        )}
       </div>
 
-      <div className="product-filter-panel">
-        <div className="product-search-box">
-          <FiSearch className="search-icon" />
-          <input
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-          {search && (
-            <button onClick={() => setSearch("")}>
+      <select
+        value={sortBy}
+        onChange={(e) => {
+          setSortBy(e.target.value);
+          setCurrentPage(1);
+        }}
+      >
+        <option value="latest">Latest</option>
+        <option value="low">Price Low to High</option>
+        <option value="high">Price High to Low</option>
+        <option value="az">A - Z</option>
+        <option value="za">Z - A</option>
+      </select>
+
+      <div className="view-toggle">
+        <button
+          className={viewMode === "grid" ? "active-view" : ""}
+          onClick={() => setViewMode("grid")}
+          aria-label="Grid view"
+        >
+          <FiGrid />
+        </button>
+
+        <button
+          className={viewMode === "list" ? "active-view" : ""}
+          onClick={() => setViewMode("list")}
+          aria-label="List view"
+        >
+          <FiList />
+        </button>
+      </div>
+    </div>
+
+    <div className="mobile-product-toolbar">
+      <button
+        className="mobile-filter-btn"
+        onClick={() => setShowMobileFilters(true)}
+      >
+        <FiFilter />
+        Filters
+      </button>
+
+      <p>
+        <strong>{filteredProducts.length}</strong> Products
+      </p>
+    </div>
+
+    <div className="product-layout">
+      <aside
+        className={`filter-sidebar ${
+          showMobileFilters ? "mobile-filter-open" : ""
+        }`}
+      >
+        <div className="filter-head">
+          <div className="filter-title-row">
+            <button
+              className="mobile-filter-close"
+              onClick={() => setShowMobileFilters(false)}
+              aria-label="Close filters"
+            >
               <FiX />
             </button>
-          )}
+
+            <h3>Filters</h3>
+          </div>
+
+          <button className="filter-reset-btn" onClick={resetFilters}>
+            Reset
+          </button>
         </div>
 
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-          <option value="latest">Latest</option>
-          <option value="low">Price Low to High</option>
-          <option value="high">Price High to Low</option>
-          <option value="az">A - Z</option>
-          <option value="za">Z - A</option>
+        <label>Category</label>
+
+        <select
+          value={categoryFilter}
+          onChange={(e) => {
+            setCategoryFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="all">All Categories</option>
+
+          {categories.map((cat) => (
+            <option value={cat._id} key={cat._id}>
+              {cat.name}
+            </option>
+          ))}
         </select>
 
-        <div className="view-toggle">
-          <button
-            className={viewMode === "grid" ? "active-view" : ""}
-            onClick={() => setViewMode("grid")}
-          >
-            <FiGrid />
-          </button>
-          <button
-            className={viewMode === "list" ? "active-view" : ""}
-            onClick={() => setViewMode("list")}
-          >
-            <FiList />
-          </button>
-        </div>
-      </div>
+        <label>Brand</label>
 
-      <div className="product-layout">
-        <aside className="filter-sidebar">
-          <div className="filter-head">
-            <h3>Filters</h3>
-            <button onClick={resetFilters}>Reset</button>
-          </div>
+        <select
+          value={brandFilter}
+          onChange={(e) => {
+            setBrandFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="all">All Brands</option>
 
-          <label>Category</label>
-          <select
-            value={categoryFilter}
-            onChange={(e) => {
-              setCategoryFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="all">All Categories</option>
-            {categories.map((cat) => (
-              <option value={cat._id} key={cat._id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+          {brands.map((brand) => (
+            <option value={brand} key={brand}>
+              {brand}
+            </option>
+          ))}
+        </select>
 
-          <label>Brand</label>
-          <select
-            value={brandFilter}
-            onChange={(e) => {
-              setBrandFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="all">All Brands</option>
-            {brands.map((brand) => (
-              <option value={brand} key={brand}>
-                {brand}
-              </option>
-            ))}
-          </select>
+        <label>Price</label>
 
-          <label>Price</label>
-          <select
-            value={priceFilter}
-            onChange={(e) => {
-              setPriceFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="all">All Price</option>
-            <option value="under500">Below ₹500</option>
-            <option value="500to1000">₹500 - ₹1000</option>
-            <option value="above1000">Above ₹1000</option>
-          </select>
+        <select
+          value={priceFilter}
+          onChange={(e) => {
+            setPriceFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="all">All Price</option>
+          <option value="under500">Below ₹500</option>
+          <option value="500to1000">₹500 - ₹1000</option>
+          <option value="above1000">Above ₹1000</option>
+        </select>
 
-          <label>Availability</label>
-          <select
-            value={stockFilter}
-            onChange={(e) => {
-              setStockFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="all">All</option>
-            <option value="instock">In Stock</option>
-            <option value="outstock">Out of Stock</option>
-          </select>
+        <label>Availability</label>
 
-          <label>Pack Type</label>
-          <select
-            value={packFilter}
-            onChange={(e) => {
-              setPackFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="all">All</option>
-            <option value="Single">Single</option>
-            <option value="Box">Box</option>
-            <option value="Bundle">Bundle</option>
-          </select>
-        </aside>
+        <select
+          value={stockFilter}
+          onChange={(e) => {
+            setStockFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="all">All</option>
+          <option value="instock">In Stock</option>
+          <option value="outstock">Out of Stock</option>
+        </select>
 
-        <div className="products-content">
-          <p className="product-result-info">
-            Showing <strong>{currentProducts.length}</strong> of{" "}
-            <strong>{filteredProducts.length}</strong> products
-          </p>
+        <label>Pack Type</label>
 
-          <div
-            className={
-              viewMode === "grid"
-                ? "customer-product-grid"
-                : "customer-product-grid list-view"
-            }
-          >
-            {currentProducts.length === 0 ? (
-              <div className="no-products-box">
-                <h3>No products found</h3>
-                <p>Try changing filters.</p>
-              </div>
-            ) : (
-              currentProducts.map((product) => {
-                const cartItem = getCartItem(product._id);
-                const isOutOfStock = product.stock === 0;
+        <select
+          value={packFilter}
+          onChange={(e) => {
+            setPackFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="all">All</option>
+          <option value="Single">Single</option>
+          <option value="Box">Box</option>
+          <option value="Bundle">Bundle</option>
+        </select>
 
-                return (
-                  <div className="customer-product-card" key={product._id}>
-                    <div className="product-image-box">
-                      <img
-                        src={product.imageUrl || defaultImage}
-                        alt={product.name}
-                      />
+        <button
+          className="mobile-apply-filter-btn"
+          onClick={() => setShowMobileFilters(false)}
+        >
+          Show {filteredProducts.length} Products
+        </button>
+      </aside>
 
-                      <button
-                        className={`wishlist-btn ${
-                          isWishlisted(product._id) ? "wish-active" : ""
-                        }`}
-                        onClick={() => toggleWishlist(product._id)}
-                      >
-                        <FiHeart />
-                      </button>
+      {showMobileFilters && (
+        <button
+          className="mobile-filter-overlay"
+          onClick={() => setShowMobileFilters(false)}
+          aria-label="Close filters"
+        />
+      )}
 
-                      <span className="stock-chip">
-                        {getStockText(product.stock)}
+      <div className="products-content">
+        <p className="product-result-info">
+          Showing <strong>{currentProducts.length}</strong> of{" "}
+          <strong>{filteredProducts.length}</strong> products
+        </p>
+
+        <div
+          className={
+            viewMode === "grid"
+              ? "customer-product-grid"
+              : "customer-product-grid list-view"
+          }
+        >
+          {currentProducts.length === 0 ? (
+            <div className="no-products-box">
+              <h3>No products found</h3>
+              <p>Try changing filters.</p>
+            </div>
+          ) : (
+            currentProducts.map((product) => {
+              const cartItem = getCartItem(product._id);
+              const isOutOfStock = product.stock === 0;
+
+              return (
+                <div className="customer-product-card" key={product._id}>
+                  <div className="product-image-box">
+                    <img
+                      src={product.imageUrl || defaultImage}
+                      alt={product.name}
+                    />
+
+                    <button
+                      className={`wishlist-btn ${
+                        isWishlisted(product._id) ? "wish-active" : ""
+                      }`}
+                      onClick={() => toggleWishlist(product._id)}
+                      aria-label="Toggle wishlist"
+                    >
+                      <FiHeart />
+                    </button>
+
+                    <span className="stock-chip">
+                      {getStockText(product.stock)}
+                    </span>
+
+                    {product.discount > 0 && (
+                      <span className="discount-chip">
+                        {product.discount}% OFF
                       </span>
+                    )}
+                  </div>
 
-                      {product.discount > 0 && (
-                        <span className="discount-chip">
-                          {product.discount}% OFF
-                        </span>
+                  <div className="customer-product-content">
+                    <p className="product-category">
+                      {product.brand || "No Brand"}
+                    </p>
+
+                    <h3>{product.name}</h3>
+
+                    <p className="pack-info">
+                      {product.packQuantity || 1} {product.unit || "Piece"} /{" "}
+                      {product.packType || "Single"}
+                    </p>
+
+                    <p className="product-price">₹{product.price}</p>
+
+                    <div className="customer-product-actions">
+                      {cartItem ? (
+                        <div className="qty-action-box">
+                          <button
+                            onClick={() => decreaseQty(cartItem)}
+                            aria-label="Decrease quantity"
+                          >
+                            <FiMinus />
+                          </button>
+
+                          <span>{cartItem.quantity}</span>
+
+                          <button
+                            onClick={() => increaseQty(cartItem)}
+                            aria-label="Increase quantity"
+                          >
+                            <FiPlus />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          className="add-cart-btn"
+                          disabled={isOutOfStock}
+                          onClick={() => handleAddToCart(product)}
+                        >
+                          <FiShoppingCart />
+                          Add To Cart
+                        </button>
+                      )}
+
+                      {product.price >= 1000 && !isOutOfStock && (
+                        <button
+                          className="buy-now-btn"
+                          onClick={() => handleBuyNow(product)}
+                        >
+                          <FiZap />
+                          Buy Now
+                        </button>
                       )}
                     </div>
-
-                    <div className="customer-product-content">
-                      <p className="product-category">
-                        {product.brand || "No Brand"}
-                      </p>
-
-                      <h3>{product.name}</h3>
-
-                      <p className="pack-info">
-                        {product.packQuantity || 1} {product.unit || "Piece"} /{" "}
-                        {product.packType || "Single"}
-                      </p>
-
-                      <p className="product-price">₹{product.price}</p>
-
-                      <div className="customer-product-actions">
-                        {cartItem ? (
-                          <div className="qty-action-box">
-                            <button onClick={() => decreaseQty(cartItem)}>
-                              <FiMinus />
-                            </button>
-
-                            <span>{cartItem.quantity}</span>
-
-                            <button onClick={() => increaseQty(cartItem)}>
-                              <FiPlus />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            className="add-cart-btn"
-                            disabled={isOutOfStock}
-                            onClick={() => handleAddToCart(product)}
-                          >
-                            <FiShoppingCart />
-                            Add To Cart
-                          </button>
-                        )}
-
-                        {product.price >= 1000 && !isOutOfStock && (
-                          <button
-                            className="buy-now-btn"
-                            onClick={() => handleBuyNow(product)}
-                          >
-                            <FiZap />
-                            Buy Now
-                          </button>
-                        )}
-                      </div>
-                    </div>
                   </div>
-                );
-              })
-            )}
-          </div>
-
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(1)}
-              >
-                First
-              </button>
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(currentPage - 1)}
-              >
-                Prev
-              </button>
-
-              {[...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index}
-                  className={currentPage === index + 1 ? "active-page" : ""}
-                  onClick={() => setCurrentPage(index + 1)}
-                >
-                  {index + 1}
-                </button>
-              ))}
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(currentPage + 1)}
-              >
-                Next
-              </button>
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(totalPages)}
-              >
-                Last
-              </button>
-            </div>
+                </div>
+              );
+            })
           )}
         </div>
-      </div>
-    </section>
-  );
-};
 
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(1)}
+            >
+              First
+            </button>
+
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+            >
+              Prev
+            </button>
+
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index}
+                className={currentPage === index + 1 ? "active-page" : ""}
+                onClick={() => setCurrentPage(index + 1)}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+            >
+              Next
+            </button>
+
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(totalPages)}
+            >
+              Last
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+);
+}
 export default ProductSection;

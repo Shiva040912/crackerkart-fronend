@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
   FiCheckCircle,
+  FiClock,
   FiDownload,
   FiEye,
   FiFileText,
+  FiMapPin,
+  FiPackage,
   FiRefreshCw,
   FiTrash2,
   FiTruck,
@@ -19,13 +22,135 @@ import {
   clearCancelledOrders,
   getMyOrders,
 } from "../../api/order";
-
 import socket from "../../service/socket";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import logoImg from "../../assets/bg-logo.png";
 
 import "../../styles/orders.css";
+
+const ORDER_STEPS = [
+  { key: "confirmed", label: "Confirmed", value: 50 },
+  { key: "shipped", label: "Shipped", value: 75 },
+  { key: "delivered", label: "Delivered", value: 100 },
+];
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0));
+
+const formatDate = (value) => {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const getOrderAmount = (order) =>
+  Number(
+    order?.grandTotal ??
+      order?.totalAmount ??
+      order?.amount ??
+      order?.total ??
+      0,
+  );
+
+const getOrderProgress = (status) => {
+  const normalizedStatus = String(status || "confirmed").toLowerCase();
+
+  const progressMap = {
+    pending: 10,
+    confirmed: 25,
+    processing: 35,
+    packed: 50,
+    shipped: 75,
+    out_for_delivery: 90,
+    delivered: 100,
+    cancelled: 0,
+  };
+
+  return progressMap[normalizedStatus] ?? 25;
+};
+
+const getStatusMessage = (status) => {
+  const normalizedStatus = String(status || "confirmed").toLowerCase();
+
+  const statusMap = {
+    pending: "Payment Pending",
+    confirmed: "Order Confirmed",
+    processing: "Order Processing",
+    packed: "Order Packed",
+    shipped: "Order Shipped",
+    out_for_delivery: "Out for Delivery",
+    delivered: "Order Delivered",
+    cancelled: "Order Cancelled",
+  };
+
+  return statusMap[normalizedStatus] || normalizedStatus.replaceAll("_", " ");
+};
+
+const getRefundDetails = (order) => {
+  const status = String(order?.refundStatus || "").toLowerCase();
+
+  if (!status || status === "not_requested") return null;
+
+  if (["processed", "refunded", "success", "completed"].includes(status)) {
+    return {
+      label: "Refund Processed",
+      className: "success",
+      icon: <FiCheckCircle />,
+    };
+  }
+
+  if (["failed", "rejected"].includes(status)) {
+    return {
+      label: "Refund Failed",
+      className: "failed",
+      icon: <FiXCircle />,
+    };
+  }
+
+  return {
+    label: "Refund Processing",
+    className: "pending",
+    icon: <FiClock />,
+  };
+};
+
+const getLogoBase64 = () =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+
+    image.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.naturalWidth || image.width;
+        canvas.height = image.naturalHeight || image.height;
+
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.95));
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    image.onerror = () => reject(new Error("Logo load failed"));
+    image.src = logoImg;
+  });
 
 function MyOrders() {
   const [orders, setOrders] = useState([]);
@@ -36,28 +161,21 @@ function MyOrders() {
 
   const loadOrders = useCallback(async (showLoading = true) => {
     try {
-      if (showLoading) {
-        setLoading(true);
-      }
+      if (showLoading) setLoading(true);
 
       const response = await getMyOrders();
+      const orderList = Array.isArray(response?.data) ? response.data : [];
 
-      setOrders(Array.isArray(response.data) ? response.data : []);
+      setOrders(orderList);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to load orders");
+      toast.error(error?.response?.data?.message || "Failed to load orders");
     } finally {
-      if (showLoading) {
-        setLoading(false);
-      }
+      if (showLoading) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-
+    window.scrollTo({ top: 0, behavior: "smooth" });
     loadOrders();
 
     const handleOrderUpdated = () => {
@@ -71,120 +189,64 @@ function MyOrders() {
     };
   }, [loadOrders]);
 
-  const getLogoBase64 = async () => {
-    const response = await fetch(logoImg);
-    const blob = await response.blob();
+  const cancelledOrdersCount = useMemo(
+    () =>
+      orders.filter(
+        (order) =>
+          String(order.orderStatus || "").toLowerCase() === "cancelled",
+      ).length,
+    [orders],
+  );
 
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+  const handleClearCancelled = async () => {
+    if (cancelledOrdersCount === 0) {
+      toast.error("Cancelled orders illa");
+      return;
+    }
 
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
+    const confirmed = window.confirm(
+      "Cancelled order history ellam clear pannava?",
+    );
 
-      reader.readAsDataURL(blob);
-    });
-  };
+    if (!confirmed) return;
 
-  const getOrderAmount = (order) => {
-    return Number(order.totalAmount || order.grandTotal || 0);
-  };
+    try {
+      setClearingHistory(true);
+      const response = await clearCancelledOrders();
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(Number(amount || 0));
-  };
+      toast.success(
+        response?.data?.message || "Cancelled order history cleared",
+      );
 
-  const formatDate = (date) => {
-    if (!date) return "-";
-
-    return new Date(date).toLocaleString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const getOrderProgress = (status) => {
-    switch (status) {
-      case "confirmed":
-        return 25;
-
-      case "packed":
-        return 50;
-
-      case "shipped":
-        return 75;
-
-      case "delivered":
-        return 100;
-
-      default:
-        return 0;
+      setOpenOrderId(null);
+      await loadOrders(false);
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message ||
+          "Cancelled order history clear panna mudiyala",
+      );
+    } finally {
+      setClearingHistory(false);
     }
   };
 
-  const getStatusMessage = (status) => {
-    switch (status) {
-      case "confirmed":
-        return "Order Confirmed";
+  const handleCancel = async (orderId) => {
+    const confirmed = window.confirm("Intha order-ah cancel pannava?");
+    if (!confirmed) return;
 
-      case "packed":
-        return "Order Packed";
+    try {
+      setCancellingId(orderId);
+      const response = await cancelOrder(orderId);
 
-      case "shipped":
-        return "Order Shipped";
-
-      case "delivered":
-        return "Order Delivered";
-
-      case "cancelled":
-        return "Order Cancelled";
-
-      default:
-        return "Order Received";
+      toast.success(response?.data?.message || "Order cancelled successfully");
+      await loadOrders(false);
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Order cancel panna mudiyala",
+      );
+    } finally {
+      setCancellingId(null);
     }
-  };
-
-  const getRefundDetails = (order) => {
-    if (
-      order.refundStatus === "processed" ||
-      order.paymentStatus === "refunded"
-    ) {
-      return {
-        label: "Refund Collected",
-        className: "success",
-        icon: <FiCheckCircle />,
-      };
-    }
-
-    if (
-      order.refundStatus === "pending" ||
-      order.paymentStatus === "refund_pending"
-    ) {
-      return {
-        label: "Refund Pending",
-        className: "pending",
-        icon: <FiRefreshCw />,
-      };
-    }
-
-    if (
-      order.refundStatus === "failed" ||
-      order.paymentStatus === "refund_failed"
-    ) {
-      return {
-        label: "Refund Failed",
-        className: "failed",
-        icon: <FiXCircle />,
-      };
-    }
-
-    return null;
   };
 
   const downloadInvoice = async (order) => {
@@ -662,295 +724,320 @@ function MyOrders() {
     }
   };
 
-  const handleCancel = async (orderId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to cancel this order?",
-    );
-
-    if (!confirmed) return;
-
-    try {
-      setCancellingId(orderId);
-
-      const response = await cancelOrder(orderId);
-
-      toast.success(response.data?.message || "Order cancelled successfully");
-
-      await loadOrders(false);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Order cancellation failed");
-    } finally {
-      setCancellingId(null);
-    }
-  };
-
-  const handleClearCancelled = async () => {
-    const confirmed = window.confirm(
-      "Clear eligible cancelled orders from history?",
-    );
-
-    if (!confirmed) return;
-
-    try {
-      setClearingHistory(true);
-
-      const response = await clearCancelledOrders();
-
-      toast.success(
-        response.data?.message || "Cancelled order history cleared",
-      );
-
-      await loadOrders(false);
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Unable to clear cancelled history",
-      );
-    } finally {
-      setClearingHistory(false);
-    }
-  };
-
   return (
     <>
       <Navbar />
 
       <main className="orders-page">
-        <div className="orders-top">
+        <section className="orders-hero">
           <div>
-            <p>Order History</p>
+            <p className="orders-eyebrow">Order History</p>
             <h1>My Orders</h1>
+            <span>
+              Track delivery, view order details and download your invoice.
+            </span>
           </div>
 
           <button
             type="button"
             className="clear-history-btn"
-            disabled={clearingHistory}
+            disabled={clearingHistory || cancelledOrdersCount === 0}
             onClick={handleClearCancelled}
           >
             <FiTrash2 />
-
-            {clearingHistory ? "Clearing..." : "Clear Cancelled History"}
+            {clearingHistory ? "Clearing..." : "Clear Cancelled"}
           </button>
-        </div>
+        </section>
 
         {loading ? (
-          <div className="no-orders-box">
+          <section className="orders-empty-state">
             <FiRefreshCw className="orders-loading-icon" />
-            <h2>Loading orders...</h2>
-          </div>
+            <h2>Loading your orders</h2>
+            <p>Please wait while we fetch your latest order history.</p>
+          </section>
         ) : orders.length === 0 ? (
-          <div className="no-orders-box">
+          <section className="orders-empty-state">
             <FiFileText />
             <h2>No orders found</h2>
-            <p>Your completed orders will appear here.</p>
-          </div>
+            <p>Your orders will appear here after purchase.</p>
+          </section>
         ) : (
-          <div className="orders-list">
+          <section className="orders-list">
             {orders.map((order) => {
+              const normalizedStatus = String(
+                order.orderStatus || "confirmed",
+              ).toLowerCase();
+
               const isOpen = openOrderId === order._id;
-
-              const progress = getOrderProgress(order.orderStatus);
-
+              const progress = getOrderProgress(normalizedStatus);
               const refundDetails = getRefundDetails(order);
 
+              const itemCount = (order.items || []).reduce(
+                (total, item) => total + Number(item.quantity || 0),
+                0,
+              );
+
               const canCancel =
-                !["cancelled", "shipped", "delivered"].includes(
-                  order.orderStatus,
-                ) && order.refundStatus !== "processed";
+                ![
+                  "cancelled",
+                  "shipped",
+                  "out_for_delivery",
+                  "delivered",
+                ].includes(normalizedStatus) &&
+                String(order.refundStatus || "").toLowerCase() !== "processed";
 
               return (
-                <article className="order-card" key={order._id}>
-                  <div className="order-main-row">
-                    <div>
-                      <span className="small-label">Invoice</span>
-
+                <article
+                  className={`order-card order-${normalizedStatus}`}
+                  key={order._id}
+                >
+                  <div className="order-card-head">
+                    <div className="order-number-block">
+                      <span className="small-label">Invoice Number</span>
                       <h3>{order.invoiceNumber || order._id}</h3>
+                      <p>{formatDate(order.createdAt)}</p>
                     </div>
 
-                    <div>
-                      <span className="small-label">Status</span>
-
+                    <div className="order-head-right">
                       <span
-                        className={`customer-status-badge ${
-                          order.orderStatus || "confirmed"
-                        }`}
+                        className={`customer-status-badge ${normalizedStatus}`}
                       >
-                        {getStatusMessage(order.orderStatus)}
+                        {getStatusMessage(normalizedStatus)}
                       </span>
+
+                      <div className="order-total-block">
+                        <span>Total</span>
+                        <strong>{formatCurrency(getOrderAmount(order))}</strong>
+                      </div>
                     </div>
-
-                    <div>
-                      <span className="small-label">Amount</span>
-
-                      <h3>{formatCurrency(getOrderAmount(order))}</h3>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="view-details-btn"
-                      onClick={() => setOpenOrderId(isOpen ? null : order._id)}
-                    >
-                      {isOpen ? <FiX /> : <FiEye />}
-
-                      {isOpen ? "Close" : "View Details"}
-                    </button>
                   </div>
 
-                  <div className="customer-order-summary">
-                    {order.orderStatus !== "cancelled" && (
-                      <div className="customer-order-progress-wrap">
-                        <div className="customer-order-progress-info">
-                          <span>Order Progress</span>
-                          <strong>{progress}%</strong>
-                        </div>
+                  {normalizedStatus !== "cancelled" ? (
+                    <div className="order-timeline-section">
+                      <div className="timeline-heading">
+                        <span>Delivery Progress</span>
+                        <strong>{progress}%</strong>
+                      </div>
 
-                        <div className="customer-progress">
+                      <div className="order-timeline-track">
+                        <div
+                          className="order-timeline-fill"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+
+                      <div className="order-timeline-steps">
+                        {ORDER_STEPS.map((step) => (
                           <div
-                            className="customer-progress-fill"
-                            style={{
-                              width: `${progress}%`,
-                            }}
-                          />
-                        </div>
-
-                        <div className="customer-order-steps">
-                          <span className={progress >= 25 ? "completed" : ""}>
-                            Confirmed
-                          </span>
-
-                          <span className={progress >= 75 ? "completed" : ""}>
-                            Shipped
-                          </span>
-
-                          <span className={progress >= 100 ? "completed" : ""}>
-                            Delivered
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {refundDetails && (
-                      <div
-                        className={`refund-badge ${refundDetails.className}`}
-                      >
-                        {refundDetails.icon}
-                        {refundDetails.label}
-                      </div>
-                    )}
-                  </div>
-
-                  {isOpen && (
-                    <div className="order-expanded">
-                      <button
-                        type="button"
-                        className="close-expanded-btn"
-                        onClick={() => setOpenOrderId(null)}
-                      >
-                        <FiX />
-                      </button>
-
-                      <div className="order-info-grid">
-                        <p>
-                          <strong>Order ID:</strong> {order._id}
-                        </p>
-
-                        <p>
-                          <strong>Date:</strong> {formatDate(order.createdAt)}
-                        </p>
-
-                        <p>
-                          <strong>Payment:</strong> {order.paymentStatus || "-"}
-                        </p>
-
-                        <p>
-                          <strong>Order Status:</strong>{" "}
-                          {order.orderStatus || "-"}
-                        </p>
-
-                        <p>
-                          <strong>Refund Status:</strong>{" "}
-                          {refundDetails?.label || "Not Requested"}
-                        </p>
-
-                        {order.razorpayRefundId && (
-                          <p>
-                            <strong>Refund ID:</strong> {order.razorpayRefundId}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="order-address-box">
-                        <h4>Delivery Address</h4>
-
-                        <p>{order.deliveryAddress?.fullName}</p>
-
-                        <p>{order.deliveryAddress?.phone}</p>
-
-                        <p>{order.deliveryAddress?.address}</p>
-
-                        <p>
-                          {order.deliveryAddress?.city} -{" "}
-                          {order.deliveryAddress?.pincode}
-                        </p>
-                      </div>
-
-                      <div className="order-items-box">
-                        <h4>Items</h4>
-
-                        {order.items?.map((item, index) => (
-                          <div
-                            className="order-item-row"
-                            key={item._id || `${item.name}-${index}`}
+                            className={`timeline-step ${
+                              progress >= step.value ? "completed" : ""
+                            }`}
+                            key={step.key}
                           >
-                            <span>
-                              {item.name} × {item.quantity}
+                            <span className="timeline-dot">
+                              {progress >= step.value && <FiCheckCircle />}
                             </span>
-
-                            <span>
-                              {formatCurrency(
-                                Number(item.price || 0) *
-                                  Number(item.quantity || 0),
-                              )}
-                            </span>
+                            <small>{step.label}</small>
                           </div>
                         ))}
                       </div>
+                    </div>
+                  ) : (
+                    <div className="cancelled-order-banner">
+                      <FiXCircle />
+                      <div>
+                        <strong>Order Cancelled</strong>
+                        <p>Refund status is shown below.</p>
+                      </div>
+                    </div>
+                  )}
 
-                      {["shipped", "delivered", "cancelled"].includes(
-                        order.orderStatus,
-                      ) && (
-                        <div className="customer-order-state-box">
-                          {order.orderStatus === "shipped" && (
+                  <div className="order-bottom-row">
+                    <div className="order-quick-info">
+                      <div>
+                        <span>Items</span>
+                        <strong>{itemCount}</strong>
+                      </div>
+
+                      <div>
+                        <span>Payment</span>
+                        <strong>{order.paymentStatus || "-"}</strong>
+                      </div>
+
+                      <div>
+                        <span>Delivery</span>
+                        <strong>{order.deliveryAddress?.city || "-"}</strong>
+                      </div>
+                    </div>
+
+                    <div className="order-card-actions">
+                      <button
+                        type="button"
+                        className="view-details-btn"
+                        onClick={() =>
+                          setOpenOrderId(isOpen ? null : order._id)
+                        }
+                      >
+                        {isOpen ? <FiX /> : <FiEye />}
+                        {isOpen ? "Close" : "View Details"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="invoice-btn"
+                        onClick={() => downloadInvoice(order)}
+                      >
+                        <FiDownload />
+                        Download Invoice
+                      </button>
+                    </div>
+                  </div>
+
+                  {refundDetails && (
+                    <div className={`refund-badge ${refundDetails.className}`}>
+                      {refundDetails.icon}
+                      {refundDetails.label}
+                    </div>
+                  )}
+
+                  {isOpen && (
+                    <div className="order-expanded">
+                      <div className="expanded-section-title">
+                        <div>
+                          <span>Complete Information</span>
+                          <h4>Order Details</h4>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="close-expanded-btn"
+                          onClick={() => setOpenOrderId(null)}
+                          aria-label="Close order details"
+                        >
+                          <FiX />
+                        </button>
+                      </div>
+
+                      <div className="order-info-grid">
+                        <div>
+                          <span>Order ID</span>
+                          <strong>{order._id}</strong>
+                        </div>
+
+                        <div>
+                          <span>Order Date</span>
+                          <strong>{formatDate(order.createdAt)}</strong>
+                        </div>
+
+                        <div>
+                          <span>Payment Status</span>
+                          <strong>{order.paymentStatus || "-"}</strong>
+                        </div>
+
+                        <div>
+                          <span>Order Status</span>
+                          <strong>{getStatusMessage(normalizedStatus)}</strong>
+                        </div>
+
+                        <div>
+                          <span>Refund Status</span>
+                          <strong>
+                            {refundDetails?.label || "Not Requested"}
+                          </strong>
+                        </div>
+
+                        {order.razorpayRefundId && (
+                          <div>
+                            <span>Refund ID</span>
+                            <strong>{order.razorpayRefundId}</strong>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="order-details-columns">
+                        <section className="order-address-box">
+                          <FiMapPin className="detail-box-icon" />
+                          <span className="detail-box-label">
+                            Shipping Information
+                          </span>
+                          <h4>Delivery Address</h4>
+                          <strong>
+                            {order.deliveryAddress?.fullName || "-"}
+                          </strong>
+                          <p>{order.deliveryAddress?.phone || "-"}</p>
+                          <p>{order.deliveryAddress?.address || "-"}</p>
+                          <p>
+                            {order.deliveryAddress?.city || "-"} -{" "}
+                            {order.deliveryAddress?.pincode || "-"}
+                          </p>
+                        </section>
+
+                        <section className="order-items-box">
+                          <FiPackage className="detail-box-icon" />
+                          <span className="detail-box-label">
+                            Purchased Products
+                          </span>
+                          <h4>Order Items</h4>
+
+                          <div className="order-items-list">
+                            {(order.items || []).map((item, index) => (
+                              <div
+                                className="order-item-row"
+                                key={item._id || `${item.name}-${index}`}
+                              >
+                                <div>
+                                  <strong>{item.name || "Product"}</strong>
+                                  <span>Quantity: {item.quantity || 0}</span>
+                                </div>
+
+                                <strong>
+                                  {formatCurrency(
+                                    Number(item.price || 0) *
+                                      Number(item.quantity || 0),
+                                  )}
+                                </strong>
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+                      </div>
+
+                      {[
+                        "shipped",
+                        "out_for_delivery",
+                        "delivered",
+                        "cancelled",
+                      ].includes(normalizedStatus) && (
+                        <div
+                          className={`customer-order-state-box ${normalizedStatus}`}
+                        >
+                          {["shipped", "out_for_delivery"].includes(
+                            normalizedStatus,
+                          ) && (
                             <>
                               <FiTruck />
-
                               <div>
                                 <strong>Order is on the way</strong>
-
                                 <p>Your order has been shipped.</p>
                               </div>
                             </>
                           )}
 
-                          {order.orderStatus === "delivered" && (
+                          {normalizedStatus === "delivered" && (
                             <>
                               <FiCheckCircle />
-
                               <div>
                                 <strong>Order delivered</strong>
-
                                 <p>Delivery completed successfully.</p>
                               </div>
                             </>
                           )}
 
-                          {order.orderStatus === "cancelled" && (
+                          {normalizedStatus === "cancelled" && (
                             <>
                               <FiXCircle />
-
                               <div>
                                 <strong>Order cancelled</strong>
-
                                 <p>Check the refund status shown above.</p>
                               </div>
                             </>
@@ -958,17 +1045,8 @@ function MyOrders() {
                         </div>
                       )}
 
-                      <div className="order-action-row">
-                        <button
-                          type="button"
-                          className="invoice-btn"
-                          onClick={() => downloadInvoice(order)}
-                        >
-                          <FiDownload />
-                          Download Invoice
-                        </button>
-
-                        {canCancel && (
+                      {canCancel && (
+                        <div className="expanded-action-row">
                           <button
                             type="button"
                             className="cancel-order-btn"
@@ -976,19 +1054,18 @@ function MyOrders() {
                             onClick={() => handleCancel(order._id)}
                           >
                             <FiX />
-
                             {cancellingId === order._id
                               ? "Cancelling..."
                               : "Cancel Order"}
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </article>
               );
             })}
-          </div>
+          </section>
         )}
       </main>
 

@@ -76,6 +76,11 @@ const menus = {
       path: "/admin/products",
       icon: FiPackage,
     },
+     {
+      label: "Categories",
+      path: "/admin/categories",
+      icon: FiGrid,
+    },
     {
       label: "Stock",
       path: "/admin/stock",

@@ -38,6 +38,7 @@ const Stock = () => {
       setLoading(true);
 
       const response = await getProducts();
+
       const productList = Array.isArray(response.data)
         ? response.data
         : [];
@@ -47,7 +48,7 @@ const Stock = () => {
       const values = {};
 
       productList.forEach((product) => {
-        values[product._id] = product.stock ?? 0;
+        values[product._id] = "";
       });
 
       setStockValues(values);
@@ -145,35 +146,34 @@ const Stock = () => {
   };
 
   const handleStockUpdate = async (product) => {
-    const newStock = Number(
+    const stockToAdd = Number(
       stockValues[product._id]
     );
 
     if (
       stockValues[product._id] === "" ||
-      Number.isNaN(newStock) ||
-      newStock < 0
+      Number.isNaN(stockToAdd) ||
+      stockToAdd <= 0
     ) {
       return toast.error(
-        "Enter a valid stock quantity"
+        "Enter a valid stock quantity to add"
       );
     }
 
-    if (newStock === Number(product.stock)) {
-      return toast.error(
-        "Stock quantity has not changed"
-      );
-    }
+    const currentStock = Number(product.stock || 0);
+
+    const updatedStock =
+      currentStock + stockToAdd;
 
     try {
       setUpdatingId(product._id);
 
       await updateProduct(product._id, {
-        stock: newStock,
+        stock: updatedStock,
       });
 
       toast.success(
-        `${product.name} stock updated`
+        `${stockToAdd} units added to ${product.name}. Total stock: ${updatedStock}`
       );
 
       await loadProducts();
@@ -224,8 +224,8 @@ const Stock = () => {
             <h1>Stock Management</h1>
 
             <p>
-              Monitor live inventory, identify low-stock products,
-              and update available quantities.
+              Monitor live inventory, identify low-stock
+              products, and add available quantities.
             </p>
           </div>
 
@@ -254,8 +254,12 @@ const Stock = () => {
 
             <div className="stock-summary-content">
               <p>Total Stock</p>
+
               <strong>{totalStock}</strong>
-              <small>Available inventory units</small>
+
+              <small>
+                Available inventory units
+              </small>
             </div>
           </article>
 
@@ -266,7 +270,9 @@ const Stock = () => {
 
             <div className="stock-summary-content">
               <p>Healthy Products</p>
+
               <strong>{healthyStockCount}</strong>
+
               <small>More than 10 units</small>
             </div>
           </article>
@@ -278,8 +284,12 @@ const Stock = () => {
 
             <div className="stock-summary-content">
               <p>Low Stock</p>
+
               <strong>{lowStockCount}</strong>
-              <small>Between 1 and 10 units</small>
+
+              <small>
+                Between 1 and 10 units
+              </small>
             </div>
           </article>
 
@@ -290,8 +300,12 @@ const Stock = () => {
 
             <div className="stock-summary-content">
               <p>Out of Stock</p>
+
               <strong>{outOfStockCount}</strong>
-              <small>Needs immediate refill</small>
+
+              <small>
+                Needs immediate refill
+              </small>
             </div>
           </article>
         </section>
@@ -306,7 +320,8 @@ const Stock = () => {
               <h2>Product Stock</h2>
 
               <p>
-                Update stock quantities without changing product details.
+                Add stock quantities without changing
+                product details.
               </p>
             </div>
 
@@ -357,14 +372,23 @@ const Stock = () => {
           {loading ? (
             <div className="stock-empty-state">
               <span className="stock-loading-ring" />
+
               <strong>Loading stock...</strong>
-              <p>Please wait while inventory data is loaded.</p>
+
+              <p>
+                Please wait while inventory data is
+                loaded.
+              </p>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="stock-empty-state">
               <FiPackage />
+
               <strong>No products found</strong>
-              <p>Try changing your search or stock filter.</p>
+
+              <p>
+                Try changing your search or stock filter.
+              </p>
             </div>
           ) : (
             <div className="stock-table-wrapper">
@@ -376,7 +400,7 @@ const Stock = () => {
                     <th>Category</th>
                     <th>Current Stock</th>
                     <th>Status</th>
-                    <th>New Stock</th>
+                    <th>Add Stock</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -403,10 +427,13 @@ const Stock = () => {
                                 </strong>
 
                                 <span>
-                                  {product.packQuantity || 1}{" "}
-                                  {product.unit || "Piece"}{" "}
+                                  {product.packQuantity ||
+                                    1}{" "}
+                                  {product.unit ||
+                                    "Piece"}{" "}
                                   /{" "}
-                                  {product.packType || "Single"}
+                                  {product.packType ||
+                                    "Single"}
                                 </span>
                               </div>
                             </div>
@@ -450,7 +477,8 @@ const Stock = () => {
                               <input
                                 className="stock-update-input"
                                 type="number"
-                                min="0"
+                                min="1"
+                                placeholder="Qty"
                                 value={
                                   stockValues[
                                     product._id
@@ -482,8 +510,8 @@ const Stock = () => {
                             >
                               {updatingId ===
                               product._id
-                                ? "Updating..."
-                                : "Update"}
+                                ? "Adding..."
+                                : "Add Stock"}
                             </button>
                           </td>
                         </tr>

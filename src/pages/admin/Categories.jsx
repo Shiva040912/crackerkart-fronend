@@ -11,7 +11,7 @@ import {
   FiX,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
-import defaultImage from "../../assets/image.jpeg"
+import defaultImage from "../../assets/image.jpeg";
 
 import api from "../../api/axios";
 import "../../styles/admincommon.css";
@@ -92,6 +92,24 @@ const Categories = () => {
     setShowForm(false);
   };
 
+  useEffect(() => {
+    if (!showForm) return undefined;
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        resetForm();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    document.body.classList.add("category-modal-open");
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.classList.remove("category-modal-open");
+    };
+  }, [showForm]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -138,11 +156,6 @@ const Categories = () => {
     });
 
     setShowForm(true);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
   };
 
   const handleStatusToggle = async (category) => {
@@ -292,130 +305,126 @@ const Categories = () => {
         </section>
 
         {showForm && (
-          <section className="category-form-panel">
-            <div className="category-panel-heading">
-              <div>
-                <span className="category-section-label">
-                  {editingId
-                    ? "Editing Category"
-                    : "New Category"}
-                </span>
+          <div
+            className="category-modal-overlay"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                resetForm();
+              }
+            }}
+          >
+            <section
+              className="category-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="category-modal-title"
+            >
+              <div className="category-modal-header">
+                <div>
+                  <span className="category-section-label">
+                    {editingId
+                      ? "Editing Category"
+                      : "New Category"}
+                  </span>
 
-                <h2>
-                  {editingId
-                    ? "Update Category"
-                    : "Create Category"}
-                </h2>
+                  <h2 id="category-modal-title">
+                    {editingId
+                      ? "Update Category"
+                      : "Create Category"}
+                  </h2>
 
-                <p>
-                  Add the category information and save it
-                  to your product catalog.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                className="category-cancel-edit"
-                onClick={resetForm}
-              >
-                <FiX />
-                {editingId ? "Cancel Edit" : "Close"}
-              </button>
-            </div>
-
-            <div className="category-form-layout">
-              <form
-                className="category-form-grid"
-                onSubmit={handleSubmit}
-              >
-                <div className="category-form-group">
-                  <label>Category Name</label>
-
-                  <input
-                    name="name"
-                    placeholder="Example: Rockets"
-                    value={form.name}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="category-form-group">
-                  <label>Image URL</label>
-
-                  <input
-                    name="image"
-                    placeholder="Paste category image URL"
-                    value={form.image}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="category-form-group category-form-full">
-                  <label>Description</label>
-
-                  <textarea
-                    name="description"
-                    placeholder="Enter a short category description"
-                    value={form.description}
-                    onChange={handleChange}
-                  />
+                  <p>
+                    Add the category information and save it
+                    to your product catalog.
+                  </p>
                 </div>
 
                 <button
-                  type="submit"
-                  className="category-save-btn category-form-full"
+                  type="button"
+                  className="category-modal-close"
+                  onClick={resetForm}
+                  aria-label="Close category form"
+                  title="Close"
                 >
-                  {editingId
-                    ? "Update Category"
-                    : "Create Category"}
+                  <FiX />
                 </button>
-              </form>
+              </div>
 
-              <div className="category-preview-panel">
-                <div className="category-preview-heading">
-                  <span>
-                    <FiImage />
-                  </span>
+              <div className="category-modal-body">
+                <div className="category-form-layout">
+                  <form
+                    className="category-form-grid"
+                    onSubmit={handleSubmit}
+                  >
+                    <div className="category-form-group">
+                      <label htmlFor="category-name">
+                        Category Name
+                      </label>
 
-                  <div>
-                    <strong>Live Preview</strong>
-                    <p>
-                      Preview how the category card will look.
-                    </p>
-                  </div>
-                </div>
+                      <input
+                        id="category-name"
+                        name="name"
+                        placeholder="Example: Rockets"
+                        value={form.name}
+                        onChange={handleChange}
+                        autoFocus
+                      />
+                    </div>
 
-                <div className="category-preview-card">
-                  <div className="category-preview-image">
-                    <img
-                      src={
-                        form.image || defaultImage
-                      }
-                      alt="Category preview"
-                      onError={(event) => {
-                        event.currentTarget.src =
-                          defaultImage;
-                      }}
-                    />
-                  </div>
+                    <div className="category-form-group">
+                      <label htmlFor="category-image">
+                        Image URL
+                      </label>
 
-                  <div className="category-preview-content">
-                    <span>Category</span>
+                      <input
+                        id="category-image"
+                        name="image"
+                        placeholder="Paste category image URL"
+                        value={form.image}
+                        onChange={handleChange}
+                      />
+                    </div>
 
-                    <h3>
-                      {form.name ||
-                        "Category Name"}
-                    </h3>
+                    <div className="category-form-group category-form-full">
+                      <label htmlFor="category-description">
+                        Description
+                      </label>
 
-                    <p>
-                      {form.description ||
-                        "Your category description will appear here."}
-                    </p>
-                  </div>
+                      <textarea
+                        id="category-description"
+                        name="description"
+                        placeholder="Enter a short category description"
+                        value={form.description}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    <div className="category-modal-actions category-form-full">
+                      <button
+                        type="button"
+                        className="category-modal-cancel"
+                        onClick={resetForm}
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        type="submit"
+                        className="category-save-btn"
+                      >
+                        {editingId
+                          ? "Update Category"
+                          : "Create Category"}
+                      </button>
+                    </div>
+                  </form>
+
+                  
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </div>
         )}
 
         <section className="category-list-panel">

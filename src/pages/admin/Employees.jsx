@@ -119,6 +119,27 @@ const Employees = () => {
     setShowForm(false);
   };
 
+  useEffect(() => {
+    if (!showForm) return undefined;
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape" && !saving) {
+        setForm(initialForm);
+        setEditingId(null);
+        setShowPassword(false);
+        setShowForm(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    document.body.classList.add("employee-modal-open");
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.classList.remove("employee-modal-open");
+    };
+  }, [showForm, saving]);
+
   const validateForm = () => {
     if (!form.name.trim()) {
       toast.error("Staff name is required");
@@ -213,11 +234,6 @@ const Employees = () => {
 
     setShowPassword(false);
     setShowForm(true);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
   };
 
   const handleStatusToggle = async (employee) => {
@@ -265,7 +281,9 @@ const Employees = () => {
   };
 
   const openCreateForm = () => {
-    resetForm();
+    setForm(initialForm);
+    setEditingId(null);
+    setShowPassword(false);
     setShowForm(true);
   };
 
@@ -356,168 +374,188 @@ const Employees = () => {
         </section>
 
         {showForm && (
-          <section className="employee-form-panel">
-            <div className="employee-panel-heading">
-              <div>
-                <span className="employee-panel-eyebrow">
-                  {editingId ? "Update Staff" : "New Staff Account"}
-                </span>
+          <div
+            className="employee-modal-overlay"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !saving) {
+                resetForm();
+              }
+            }}
+          >
+            <section
+              className="employee-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="employee-modal-title"
+            >
+              <div className="employee-modal-header">
+                <div>
+                  <span className="employee-panel-eyebrow">
+                    {editingId ? "Update Staff" : "New Staff Account"}
+                  </span>
 
-                <h2>
-                  {editingId ? "Edit Employee" : "Create Employee"}
-                </h2>
+                  <h2 id="employee-modal-title">
+                    {editingId ? "Edit Employee" : "Create Employee"}
+                  </h2>
 
-                <p>
-                  Enter staff information and assign the correct
-                  department.
-                </p>
-              </div>
+                  <p>
+                    Enter staff information and assign the correct
+                    department.
+                  </p>
+                </div>
 
-              <button
-                type="button"
-                className="employee-cancel-btn"
-                onClick={resetForm}
-              >
-                <FiX />
-                {editingId ? "Cancel Edit" : "Close"}
-              </button>
-            </div>
-
-            <form className="employee-form" onSubmit={handleSubmit}>
-              <div className="employee-form-group">
-                <label htmlFor="employee-name">Staff Name</label>
-
-                <input
-                  id="employee-name"
-                  type="text"
-                  name="name"
-                  placeholder="Enter staff name"
-                  value={form.name}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="employee-form-group">
-                <label htmlFor="employee-age">Age</label>
-
-                <input
-                  id="employee-age"
-                  type="number"
-                  name="age"
-                  min="18"
-                  max="65"
-                  placeholder="Enter age"
-                  value={form.age}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="employee-form-group">
-                <label htmlFor="employee-phone">
-                  Contact Number
-                </label>
-
-                <input
-                  id="employee-phone"
-                  type="tel"
-                  name="phone"
-                  maxLength="10"
-                  placeholder="Enter 10 digit number"
-                  value={form.phone}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="employee-form-group">
-                <label htmlFor="employee-department">
-                  Department
-                </label>
-
-                <select
-                  id="employee-department"
-                  name="department"
-                  value={form.department}
-                  onChange={handleChange}
+                <button
+                  type="button"
+                  className="employee-modal-close"
+                  onClick={resetForm}
+                  disabled={saving}
+                  aria-label="Close employee form"
+                  title="Close"
                 >
-                  <option value="">Select Department</option>
-                  <option value="admin">Admin Department</option>
-                  <option value="inventory">
-                    Inventory Department
-                  </option>
-                  <option value="orders">
-                    Orders Department
-                  </option>
-                  <option value="customer_support">
-                    Customer Support
-                  </option>
-                </select>
+                  <FiX />
+                </button>
               </div>
 
-              <div className="employee-form-group">
-                <label htmlFor="employee-email">
-                  Email Address
-                </label>
+              <div className="employee-modal-body">
+                <form className="employee-form" onSubmit={handleSubmit}>
+                  <div className="employee-form-group">
+                    <label htmlFor="employee-name">Staff Name</label>
 
-                <input
-                  id="employee-email"
-                  type="email"
-                  name="email"
-                  placeholder="Enter staff email"
-                  value={form.email}
-                  onChange={handleChange}
-                  autoComplete="off"
-                />
-              </div>
-
-              {!editingId && (
-                <div className="employee-form-group">
-                  <label htmlFor="employee-password">
-                    Password
-                  </label>
-
-                  <div className="employee-password-box">
                     <input
-                      id="employee-password"
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      placeholder="Minimum 8 characters"
-                      value={form.password}
+                      id="employee-name"
+                      type="text"
+                      name="name"
+                      placeholder="Enter staff name"
+                      value={form.name}
                       onChange={handleChange}
-                      autoComplete="new-password"
+                      autoFocus
                     />
+                  </div>
 
+                  <div className="employee-form-group">
+                    <label htmlFor="employee-age">Age</label>
+
+                    <input
+                      id="employee-age"
+                      type="number"
+                      name="age"
+                      min="18"
+                      max="65"
+                      placeholder="Enter age"
+                      value={form.age}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="employee-form-group">
+                    <label htmlFor="employee-phone">Contact Number</label>
+
+                    <input
+                      id="employee-phone"
+                      type="tel"
+                      name="phone"
+                      inputMode="numeric"
+                      maxLength="10"
+                      placeholder="Enter 10 digit number"
+                      value={form.phone}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="employee-form-group">
+                    <label htmlFor="employee-department">Department</label>
+
+                    <select
+                      id="employee-department"
+                      name="department"
+                      value={form.department}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Department</option>
+                      <option value="admin">Admin Department</option>
+                      <option value="inventory">
+                        Inventory Department
+                      </option>
+                      <option value="orders">Orders Department</option>
+                      <option value="customer_support">
+                        Customer Support
+                      </option>
+                    </select>
+                  </div>
+
+                  <div className="employee-form-group">
+                    <label htmlFor="employee-email">Email Address</label>
+
+                    <input
+                      id="employee-email"
+                      type="email"
+                      name="email"
+                      placeholder="Enter staff email"
+                      value={form.email}
+                      onChange={handleChange}
+                      autoComplete="off"
+                    />
+                  </div>
+
+                  {!editingId && (
+                    <div className="employee-form-group">
+                      <label htmlFor="employee-password">Password</label>
+
+                      <div className="employee-password-box">
+                        <input
+                          id="employee-password"
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          placeholder="Minimum 8 characters"
+                          value={form.password}
+                          onChange={handleChange}
+                          autoComplete="new-password"
+                        />
+
+                        <button
+                          type="button"
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
+                          onClick={() =>
+                            setShowPassword((current) => !current)
+                          }
+                        >
+                          {showPassword ? <FiEyeOff /> : <FiEye />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="employee-modal-actions">
                     <button
                       type="button"
-                      aria-label={
-                        showPassword
-                          ? "Hide password"
-                          : "Show password"
-                      }
-                      onClick={() =>
-                        setShowPassword((current) => !current)
-                      }
+                      className="employee-modal-cancel"
+                      onClick={resetForm}
+                      disabled={saving}
                     >
-                      {showPassword ? <FiEyeOff /> : <FiEye />}
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="employee-save-btn"
+                      disabled={saving}
+                    >
+                      <FiUserPlus />
+
+                      {saving
+                        ? "Saving..."
+                        : editingId
+                          ? "Update Employee"
+                          : "Create Employee"}
                     </button>
                   </div>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="employee-save-btn"
-                disabled={saving}
-              >
-                <FiUserPlus />
-
-                {saving
-                  ? "Saving..."
-                  : editingId
-                    ? "Update Employee"
-                    : "Create Employee"}
-              </button>
-            </form>
-          </section>
+                </form>
+              </div>
+            </section>
+          </div>
         )}
 
         <section className="employee-list-panel">

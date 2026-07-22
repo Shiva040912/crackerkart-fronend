@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   FiMail,
   FiPhone,
@@ -16,8 +15,6 @@ import "../../styles/admincommon.css";
 import "../../styles/admincustomer.css";
 
 const Customers = () => {
-  const navigate = useNavigate();
-
   const adminUser = JSON.parse(
     localStorage.getItem("adminUser") || "{}"
   );
@@ -123,9 +120,14 @@ const Customers = () => {
       <AdminSidebar />
 
       <main className="admin-content">
-        <header className="admin-topbar">
-          <div>
+        <header className="admin-topbar customer-topbar">
+          <div className="customer-topbar-copy">
+            <span className="customer-eyebrow">
+              Customer Directory
+            </span>
+
             <h1>Customer Management</h1>
+
             <p>
               View all customers registered using email, Google,
               or phone login.
@@ -152,9 +154,10 @@ const Customers = () => {
               <FiUsers />
             </span>
 
-            <div>
+            <div className="customer-summary-content">
               <p>Total Customers</p>
               <strong>{customers.length}</strong>
+              <small>All registered accounts</small>
             </div>
           </article>
 
@@ -163,9 +166,10 @@ const Customers = () => {
               <FiMail />
             </span>
 
-            <div>
+            <div className="customer-summary-content">
               <p>Email Login</p>
               <strong>{emailCustomers}</strong>
+              <small>Local email accounts</small>
             </div>
           </article>
 
@@ -174,9 +178,10 @@ const Customers = () => {
               G
             </span>
 
-            <div>
+            <div className="customer-summary-content">
               <p>Google Login</p>
               <strong>{googleCustomers}</strong>
+              <small>Google connected accounts</small>
             </div>
           </article>
 
@@ -185,21 +190,41 @@ const Customers = () => {
               <FiPhone />
             </span>
 
-            <div>
+            <div className="customer-summary-content">
               <p>Phone Login</p>
               <strong>{phoneCustomers}</strong>
+              <small>OTP based accounts</small>
             </div>
           </article>
         </section>
 
         <section className="customer-management-panel">
+          <div className="customer-panel-header">
+            <div>
+              <span className="customer-section-label">
+                Customer Records
+              </span>
+
+              <h2>Registered Customers</h2>
+
+              <p>
+                Search and filter customer accounts by login method.
+              </p>
+            </div>
+
+            <span className="customer-result-count">
+              {filteredCustomers.length} customer
+              {filteredCustomers.length === 1 ? "" : "s"}
+            </span>
+          </div>
+
           <div className="customer-toolbar">
             <div className="customer-search-box">
               <FiSearch />
 
               <input
                 type="text"
-                placeholder="Search customer name, email or phone..."
+                placeholder="Search name, email or phone..."
                 value={search}
                 onChange={(event) =>
                   setSearch(event.target.value)
@@ -225,24 +250,17 @@ const Customers = () => {
             </select>
           </div>
 
-          <div className="customer-table-heading">
-            <div>
-              <h2>Registered Customers</h2>
-
-              <p>
-                {filteredCustomers.length} customer
-                {filteredCustomers.length === 1 ? "" : "s"} shown
-              </p>
-            </div>
-          </div>
-
           {loading ? (
             <div className="customer-empty-state">
-              Loading customers...
+              <span className="customer-loading-ring" />
+              <strong>Loading customers...</strong>
+              <p>Please wait while customer records are loaded.</p>
             </div>
           ) : filteredCustomers.length === 0 ? (
             <div className="customer-empty-state">
-              No customers found
+              <FiUsers />
+              <strong>No customers found</strong>
+              <p>Try changing the search text or login filter.</p>
             </div>
           ) : (
             <div className="customer-table-wrapper">
@@ -275,7 +293,7 @@ const Customers = () => {
                             </span>
                           )}
 
-                          <div>
+                          <div className="customer-profile-copy">
                             <strong>
                               {customer.name || "Customer"}
                             </strong>
@@ -286,16 +304,16 @@ const Customers = () => {
                       </td>
 
                       <td>
-                        <span className="customer-contact">
+                        <span className="customer-contact customer-email-cell">
                           <FiMail />
-                          {customer.email || "-"}
+                          <span>{customer.email || "-"}</span>
                         </span>
                       </td>
 
                       <td>
-                        <span className="customer-contact">
+                        <span className="customer-contact customer-phone-cell">
                           <FiPhone />
-                          {customer.phone || "-"}
+                          <span>{customer.phone || "-"}</span>
                         </span>
                       </td>
 
@@ -334,7 +352,11 @@ const Customers = () => {
                         </span>
                       </td>
 
-                      <td>{formatDate(customer.createdAt)}</td>
+                      <td>
+                        <span className="customer-joined-date">
+                          {formatDate(customer.createdAt)}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

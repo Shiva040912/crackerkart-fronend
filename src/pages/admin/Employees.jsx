@@ -3,6 +3,8 @@ import {
   FiEdit2,
   FiEye,
   FiEyeOff,
+  FiMail,
+  FiPhone,
   FiSearch,
   FiTrash2,
   FiUserCheck,
@@ -59,10 +61,14 @@ const Employees = () => {
       const response = await api.get("/employees");
 
       setEmployees(
-        Array.isArray(response.data?.employees) ? response.data.employees : [],
+        Array.isArray(response.data?.employees)
+          ? response.data.employees
+          : [],
       );
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to load employees");
+      toast.error(
+        error.response?.data?.message || "Failed to load employees",
+      );
     } finally {
       setLoading(false);
     }
@@ -84,7 +90,8 @@ const Employees = () => {
         employee.department?.toLowerCase().includes(query);
 
       const matchesDepartment =
-        departmentFilter === "all" || employee.department === departmentFilter;
+        departmentFilter === "all" ||
+        employee.department === departmentFilter;
 
       return matchesSearch && matchesDepartment;
     });
@@ -111,6 +118,7 @@ const Employees = () => {
     setShowPassword(false);
     setShowForm(false);
   };
+
   const validateForm = () => {
     if (!form.name.trim()) {
       toast.error("Staff name is required");
@@ -177,7 +185,6 @@ const Employees = () => {
       }
 
       resetForm();
-      setShowForm(false);
       await loadEmployees();
     } catch (error) {
       const message = error.response?.data?.message;
@@ -220,17 +227,23 @@ const Employees = () => {
       });
 
       toast.success(
-        employee.isActive ? "Employee deactivated" : "Employee activated",
+        employee.isActive
+          ? "Employee deactivated"
+          : "Employee activated",
       );
 
       await loadEmployees();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Status update failed");
+      toast.error(
+        error.response?.data?.message || "Status update failed",
+      );
     }
   };
 
   const handleDelete = async (employee) => {
-    const confirmed = window.confirm(`Delete ${employee.name} permanently?`);
+    const confirmed = window.confirm(
+      `Delete ${employee.name} permanently?`,
+    );
 
     if (!confirmed) return;
 
@@ -245,30 +258,41 @@ const Employees = () => {
 
       await loadEmployees();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Employee delete failed");
+      toast.error(
+        error.response?.data?.message || "Employee delete failed",
+      );
     }
+  };
+
+  const openCreateForm = () => {
+    resetForm();
+    setShowForm(true);
   };
 
   return (
     <div className="admin-layout">
       <AdminSidebar />
 
-      <main className="admin-content">
-        <header className="admin-topbar">
-          <div>
+      <main className="admin-content employee-page">
+        <header className="admin-topbar employee-topbar">
+          <div className="employee-topbar-content">
+            <span className="employee-eyebrow">
+              Staff Administration
+            </span>
+
             <h1>Employee Management</h1>
 
-            <p>Create and manage department staff accounts.</p>
+            <p>
+              Create staff accounts, assign departments and control
+              employee access.
+            </p>
           </div>
 
           <div className="employee-header-actions">
             <button
               type="button"
               className="employee-create-btn"
-              onClick={() => {
-                resetForm();
-                setShowForm(true);
-              }}
+              onClick={openCreateForm}
             >
               <FiUserPlus />
               Create Employee
@@ -281,44 +305,53 @@ const Employees = () => {
 
               <div>
                 <strong>{adminUser?.name || "Super Admin"}</strong>
-
                 <small>Super Administrator</small>
               </div>
             </div>
           </div>
         </header>
+
         <section className="employee-summary-grid">
-          <article className="employee-summary-card">
+          <article className="employee-summary-card total">
             <span className="employee-summary-icon">
               <FiUsers />
             </span>
 
-            <div>
+            <div className="employee-summary-content">
               <p>Total Employees</p>
               <strong>{employees.length}</strong>
+              <small>Registered staff accounts</small>
             </div>
+
+            <span className="employee-summary-decoration" />
           </article>
 
-          <article className="employee-summary-card">
-            <span className="employee-summary-icon active">
+          <article className="employee-summary-card active">
+            <span className="employee-summary-icon">
               <FiUserCheck />
             </span>
 
-            <div>
+            <div className="employee-summary-content">
               <p>Active Employees</p>
               <strong>{activeEmployees}</strong>
+              <small>Currently allowed to login</small>
             </div>
+
+            <span className="employee-summary-decoration" />
           </article>
 
-          <article className="employee-summary-card">
-            <span className="employee-summary-icon inactive">
+          <article className="employee-summary-card inactive">
+            <span className="employee-summary-icon">
               <FiUsers />
             </span>
 
-            <div>
+            <div className="employee-summary-content">
               <p>Inactive Employees</p>
               <strong>{inactiveEmployees}</strong>
+              <small>Access currently disabled</small>
             </div>
+
+            <span className="employee-summary-decoration" />
           </article>
         </section>
 
@@ -326,9 +359,18 @@ const Employees = () => {
           <section className="employee-form-panel">
             <div className="employee-panel-heading">
               <div>
-                <h2>{editingId ? "Edit Employee" : "Create Employee"}</h2>
+                <span className="employee-panel-eyebrow">
+                  {editingId ? "Update Staff" : "New Staff Account"}
+                </span>
 
-                <p>Enter staff details and assign a department.</p>
+                <h2>
+                  {editingId ? "Edit Employee" : "Create Employee"}
+                </h2>
+
+                <p>
+                  Enter staff information and assign the correct
+                  department.
+                </p>
               </div>
 
               <button
@@ -343,9 +385,10 @@ const Employees = () => {
 
             <form className="employee-form" onSubmit={handleSubmit}>
               <div className="employee-form-group">
-                <label>Staff Name</label>
+                <label htmlFor="employee-name">Staff Name</label>
 
                 <input
+                  id="employee-name"
                   type="text"
                   name="name"
                   placeholder="Enter staff name"
@@ -355,9 +398,10 @@ const Employees = () => {
               </div>
 
               <div className="employee-form-group">
-                <label>Age</label>
+                <label htmlFor="employee-age">Age</label>
 
                 <input
+                  id="employee-age"
                   type="number"
                   name="age"
                   min="18"
@@ -369,9 +413,12 @@ const Employees = () => {
               </div>
 
               <div className="employee-form-group">
-                <label>Contact Number</label>
+                <label htmlFor="employee-phone">
+                  Contact Number
+                </label>
 
                 <input
+                  id="employee-phone"
                   type="tel"
                   name="phone"
                   maxLength="10"
@@ -382,29 +429,37 @@ const Employees = () => {
               </div>
 
               <div className="employee-form-group">
-                <label>Department</label>
+                <label htmlFor="employee-department">
+                  Department
+                </label>
 
                 <select
+                  id="employee-department"
                   name="department"
                   value={form.department}
                   onChange={handleChange}
                 >
                   <option value="">Select Department</option>
-
                   <option value="admin">Admin Department</option>
-
-                  <option value="inventory">Inventory Department</option>
-
-                  <option value="orders">Orders Department</option>
-
-                  <option value="customer_support">Customer Support</option>
+                  <option value="inventory">
+                    Inventory Department
+                  </option>
+                  <option value="orders">
+                    Orders Department
+                  </option>
+                  <option value="customer_support">
+                    Customer Support
+                  </option>
                 </select>
               </div>
 
               <div className="employee-form-group">
-                <label>Email Address</label>
+                <label htmlFor="employee-email">
+                  Email Address
+                </label>
 
                 <input
+                  id="employee-email"
                   type="email"
                   name="email"
                   placeholder="Enter staff email"
@@ -416,10 +471,13 @@ const Employees = () => {
 
               {!editingId && (
                 <div className="employee-form-group">
-                  <label>Password</label>
+                  <label htmlFor="employee-password">
+                    Password
+                  </label>
 
                   <div className="employee-password-box">
                     <input
+                      id="employee-password"
                       type={showPassword ? "text" : "password"}
                       name="password"
                       placeholder="Minimum 8 characters"
@@ -430,7 +488,14 @@ const Employees = () => {
 
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={
+                        showPassword
+                          ? "Hide password"
+                          : "Show password"
+                      }
+                      onClick={() =>
+                        setShowPassword((current) => !current)
+                      }
                     >
                       {showPassword ? <FiEyeOff /> : <FiEye />}
                     </button>
@@ -454,12 +519,20 @@ const Employees = () => {
             </form>
           </section>
         )}
+
         <section className="employee-list-panel">
           <div className="employee-list-header">
             <div>
+              <span className="employee-panel-eyebrow">
+                Staff Directory
+              </span>
+
               <h2>All Employees</h2>
 
-              <p>{filteredEmployees.length} employees shown</p>
+              <p>
+                {filteredEmployees.length} employee
+                {filteredEmployees.length !== 1 ? "s" : ""} shown
+              </p>
             </div>
 
             <div className="employee-filters">
@@ -470,110 +543,256 @@ const Employees = () => {
                   type="text"
                   placeholder="Search employees..."
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChange={(event) =>
+                    setSearch(event.target.value)
+                  }
                 />
               </div>
 
               <select
                 value={departmentFilter}
-                onChange={(event) => setDepartmentFilter(event.target.value)}
+                onChange={(event) =>
+                  setDepartmentFilter(event.target.value)
+                }
               >
                 <option value="all">All Departments</option>
-
                 <option value="admin">Admin</option>
-
                 <option value="inventory">Inventory</option>
-
                 <option value="orders">Orders</option>
-
-                <option value="customer_support">Customer Support</option>
+                <option value="customer_support">
+                  Customer Support
+                </option>
               </select>
             </div>
           </div>
 
           {loading ? (
-            <div className="employee-empty-state">Loading employees...</div>
-          ) : filteredEmployees.length === 0 ? (
-            <div className="employee-empty-state">No employees found</div>
-          ) : (
-            <div className="employee-table-wrapper">
-              <table className="employee-table">
-                <thead>
-                  <tr>
-                    <th>Staff Name</th>
-                    <th>Age</th>
-                    <th>Department</th>
-                    <th>Email Address</th>
-                    <th>Contact</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredEmployees.map((employee) => (
-                    <tr key={employee._id}>
-                      <td>
-                        <div className="employee-name-cell">
-                          <span>
-                            {(employee.name || "E").charAt(0).toUpperCase()}
-                          </span>
-
-                          <strong>{employee.name}</strong>
-                        </div>
-                      </td>
-
-                      <td>{employee.age}</td>
-
-                      <td>
-                        <span className="employee-department-badge">
-                          {departmentLabels[employee.department] ||
-                            employee.department}
-                        </span>
-                      </td>
-
-                      <td>{employee.email}</td>
-
-                      <td>{employee.phone}</td>
-
-                      <td>
-                        <button
-                          type="button"
-                          className={`employee-status-btn ${
-                            employee.isActive ? "active" : "inactive"
-                          }`}
-                          onClick={() => handleStatusToggle(employee)}
-                        >
-                          {employee.isActive ? "Active" : "Inactive"}
-                        </button>
-                      </td>
-
-                      <td>
-                        <div className="employee-actions">
-                          <button
-                            type="button"
-                            className="employee-edit-btn"
-                            onClick={() => handleEdit(employee)}
-                          >
-                            <FiEdit2 />
-                            Edit
-                          </button>
-
-                          <button
-                            type="button"
-                            className="employee-delete-btn"
-                            onClick={() => handleDelete(employee)}
-                          >
-                            <FiTrash2 />
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="employee-empty-state">
+              <span className="employee-loading-spinner" />
+              <strong>Loading employees...</strong>
+              <p>Please wait while staff details are loaded.</p>
             </div>
+          ) : filteredEmployees.length === 0 ? (
+            <div className="employee-empty-state">
+              <span className="employee-empty-icon">
+                <FiUsers />
+              </span>
+
+              <strong>No employees found</strong>
+
+              <p>
+                Change your search or department filter and try again.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="employee-table-wrapper">
+                <table className="employee-table">
+                  <thead>
+                    <tr>
+                      <th>Staff Name</th>
+                      <th>Age</th>
+                      <th>Department</th>
+                      <th>Email Address</th>
+                      <th>Contact</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filteredEmployees.map((employee) => (
+                      <tr key={employee._id}>
+                        <td>
+                          <div className="employee-name-cell">
+                            <span>
+                              {(employee.name || "E")
+                                .charAt(0)
+                                .toUpperCase()}
+                            </span>
+
+                            <div>
+                              <strong>{employee.name}</strong>
+                              <small>Staff account</small>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td>
+                          <span className="employee-age">
+                            {employee.age}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span
+                            className={`employee-department-badge ${employee.department}`}
+                          >
+                            {departmentLabels[
+                              employee.department
+                            ] || employee.department}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span className="employee-table-email">
+                            {employee.email}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span className="employee-table-phone">
+                            {employee.phone}
+                          </span>
+                        </td>
+
+                        <td>
+                          <button
+                            type="button"
+                            className={`employee-status-btn ${
+                              employee.isActive
+                                ? "active"
+                                : "inactive"
+                            }`}
+                            onClick={() =>
+                              handleStatusToggle(employee)
+                            }
+                          >
+                            <span />
+                            {employee.isActive
+                              ? "Active"
+                              : "Inactive"}
+                          </button>
+                        </td>
+
+                        <td>
+                          <div className="employee-actions">
+                            <button
+                              type="button"
+                              className="employee-edit-btn"
+                              title="Edit employee"
+                              aria-label={`Edit ${employee.name}`}
+                              onClick={() => handleEdit(employee)}
+                            >
+                              <FiEdit2 />
+                            </button>
+
+                            <button
+                              type="button"
+                              className="employee-delete-btn"
+                              title="Delete employee"
+                              aria-label={`Delete ${employee.name}`}
+                              onClick={() =>
+                                handleDelete(employee)
+                              }
+                            >
+                              <FiTrash2 />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="employee-mobile-list">
+                {filteredEmployees.map((employee) => (
+                  <article
+                    className="employee-mobile-card"
+                    key={employee._id}
+                  >
+                    <div className="employee-mobile-card-head">
+                      <div className="employee-mobile-profile">
+                        <span className="employee-mobile-avatar">
+                          {(employee.name || "E")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </span>
+
+                        <div>
+                          <h3>{employee.name}</h3>
+
+                          <span
+                            className={`employee-department-badge ${employee.department}`}
+                          >
+                            {departmentLabels[
+                              employee.department
+                            ] || employee.department}
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={`employee-status-btn ${
+                          employee.isActive
+                            ? "active"
+                            : "inactive"
+                        }`}
+                        onClick={() =>
+                          handleStatusToggle(employee)
+                        }
+                      >
+                        <span />
+                        {employee.isActive
+                          ? "Active"
+                          : "Inactive"}
+                      </button>
+                    </div>
+
+                    <div className="employee-mobile-details">
+                      <div className="employee-mobile-detail">
+                        <span>
+                          <FiMail />
+                        </span>
+
+                        <div>
+                          <small>Email Address</small>
+                          <strong>{employee.email}</strong>
+                        </div>
+                      </div>
+
+                      <div className="employee-mobile-detail">
+                        <span>
+                          <FiPhone />
+                        </span>
+
+                        <div>
+                          <small>Contact Number</small>
+                          <strong>{employee.phone}</strong>
+                        </div>
+                      </div>
+
+                      <div className="employee-mobile-age">
+                        <small>Age</small>
+                        <strong>{employee.age} years</strong>
+                      </div>
+                    </div>
+
+                    <div className="employee-mobile-actions">
+                      <button
+                        type="button"
+                        className="employee-mobile-edit"
+                        onClick={() => handleEdit(employee)}
+                      >
+                        <FiEdit2 />
+                        Edit Employee
+                      </button>
+
+                      <button
+                        type="button"
+                        className="employee-mobile-delete"
+                        onClick={() => handleDelete(employee)}
+                      >
+                        <FiTrash2 />
+                        Delete
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </>
           )}
         </section>
       </main>

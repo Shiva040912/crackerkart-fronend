@@ -30,7 +30,7 @@ import logoImg from "../../assets/bg-logo.png";
 import "../../styles/orders.css";
 
 const ORDER_STEPS = [
-  { key: "confirmed", label: "Confirmed", value: 50 },
+  { key: "confirmed", label: "Confirmed", value: 25 },
   { key: "shipped", label: "Shipped", value: 75 },
   { key: "delivered", label: "Delivered", value: 100 },
 ];
@@ -72,10 +72,10 @@ const getOrderProgress = (status) => {
   const progressMap = {
     pending: 10,
     confirmed: 25,
-    processing: 35,
+    processing: 25,
     packed: 50,
     shipped: 75,
-    out_for_delivery: 90,
+    out_for_delivery: 75,
     delivered: 100,
     cancelled: 0,
   };

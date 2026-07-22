@@ -4,14 +4,14 @@ import {
   FiEdit2,
   FiFolder,
   FiGrid,
-  FiLogOut,
-  FiPackage,
+  FiImage,
+  FiPlus,
   FiSearch,
-  FiShoppingBag,
   FiTrash2,
-  FiUsers,
+  FiX,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
+import defaultImage from "../../assets/image.jpeg"
 
 import api from "../../api/axios";
 import "../../styles/admincommon.css";
@@ -21,7 +21,9 @@ import AdminSidebar from "../../components/AdminSidebar";
 const Categories = () => {
   const navigate = useNavigate();
 
-  const adminUser = JSON.parse(localStorage.getItem("adminUser") || "{}");
+  const adminUser = JSON.parse(
+    localStorage.getItem("adminUser") || "{}"
+  );
 
   const [categories, setCategories] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -35,9 +37,7 @@ const Categories = () => {
     image: "",
   });
 
-  const defaultImage =
-    "https://dummyimage.com/120x90/e2e8f0/0f172a&text=Category";
-
+  
   const fetchCategories = async () => {
     try {
       setLoading(true);
@@ -68,7 +68,9 @@ const Categories = () => {
     });
   }, [categories, search]);
 
-  const activeCount = categories.filter((category) => category.isActive).length;
+  const activeCount = categories.filter(
+    (category) => category.isActive
+  ).length;
 
   const inactiveCount = categories.length - activeCount;
 
@@ -99,18 +101,30 @@ const Categories = () => {
 
     try {
       if (editingId) {
-        await api.patch(`/categories/${editingId}`, form);
-        toast.success("Category updated successfully");
+        await api.patch(
+          `/categories/${editingId}`,
+          form
+        );
+
+        toast.success(
+          "Category updated successfully"
+        );
       } else {
         await api.post("/categories", form);
-        toast.success("Category created successfully");
+
+        toast.success(
+          "Category created successfully"
+        );
       }
 
       resetForm();
       setShowForm(false);
       fetchCategories();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Action failed");
+      toast.error(
+        error.response?.data?.message ||
+          "Action failed"
+      );
     }
   };
 
@@ -130,14 +144,20 @@ const Categories = () => {
       behavior: "smooth",
     });
   };
+
   const handleStatusToggle = async (category) => {
     try {
-      await api.patch(`/categories/${category._id}`, {
-        isActive: !category.isActive,
-      });
+      await api.patch(
+        `/categories/${category._id}`,
+        {
+          isActive: !category.isActive,
+        }
+      );
 
       toast.success(
-        category.isActive ? "Category deactivated" : "Category activated",
+        category.isActive
+          ? "Category deactivated"
+          : "Category activated"
       );
 
       fetchCategories();
@@ -147,14 +167,20 @@ const Categories = () => {
   };
 
   const handleDelete = async (categoryId) => {
-    const confirmed = window.confirm("Delete this category permanently?");
+    const confirmed = window.confirm(
+      "Delete this category permanently?"
+    );
 
     if (!confirmed) return;
 
     try {
-      await api.delete(`/categories/${categoryId}`);
+      await api.delete(
+        `/categories/${categoryId}`
+      );
 
-      toast.success("Category deleted successfully");
+      toast.success(
+        "Category deleted successfully"
+      );
 
       if (editingId === categoryId) {
         resetForm();
@@ -162,7 +188,10 @@ const Categories = () => {
 
       fetchCategories();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Delete failed");
+      toast.error(
+        error.response?.data?.message ||
+          "Delete failed"
+      );
     }
   };
 
@@ -179,10 +208,18 @@ const Categories = () => {
       <AdminSidebar />
 
       <main className="admin-content">
-        <header className="admin-topbar">
-          <div>
+        <header className="admin-topbar category-topbar">
+          <div className="category-hero-copy">
+            <span className="category-eyebrow">
+              Catalog Control
+            </span>
+
             <h1>Category Management</h1>
-            <p>Create, update and manage product categories.</p>
+
+            <p>
+              Build and organize product categories with
+              clear visuals, status control and faster updates.
+            </p>
           </div>
 
           <div className="category-header-actions">
@@ -194,16 +231,22 @@ const Categories = () => {
                 setShowForm(true);
               }}
             >
-              + Add Category
+              <FiPlus />
+              Add Category
             </button>
 
             <div className="admin-user-chip">
               <span className="admin-user-avatar">
-                {(adminUser?.name || "A").charAt(0).toUpperCase()}
+                {(adminUser?.name || "A")
+                  .charAt(0)
+                  .toUpperCase()}
               </span>
 
               <div>
-                <strong>{adminUser?.name || "Admin"}</strong>
+                <strong>
+                  {adminUser?.name || "Admin"}
+                </strong>
+
                 <small>Administrator</small>
               </div>
             </div>
@@ -211,7 +254,7 @@ const Categories = () => {
         </header>
 
         <section className="category-summary-grid">
-          <article className="category-summary-card">
+          <article className="category-summary-card total">
             <span className="category-summary-icon">
               <FiGrid />
             </span>
@@ -219,28 +262,31 @@ const Categories = () => {
             <div>
               <p>Total Categories</p>
               <strong>{categories.length}</strong>
+              <small>All catalog groups</small>
             </div>
           </article>
 
-          <article className="category-summary-card">
-            <span className="category-summary-icon active">
+          <article className="category-summary-card active">
+            <span className="category-summary-icon">
               <FiFolder />
             </span>
 
             <div>
               <p>Active Categories</p>
               <strong>{activeCount}</strong>
+              <small>Visible to customers</small>
             </div>
           </article>
 
-          <article className="category-summary-card">
-            <span className="category-summary-icon inactive">
+          <article className="category-summary-card inactive">
+            <span className="category-summary-icon">
               <FiFolder />
             </span>
 
             <div>
               <p>Inactive Categories</p>
               <strong>{inactiveCount}</strong>
+              <small>Hidden from customers</small>
             </div>
           </article>
         </section>
@@ -249,9 +295,22 @@ const Categories = () => {
           <section className="category-form-panel">
             <div className="category-panel-heading">
               <div>
-                <h2>{editingId ? "Edit Category" : "Add New Category"}</h2>
+                <span className="category-section-label">
+                  {editingId
+                    ? "Editing Category"
+                    : "New Category"}
+                </span>
 
-                <p>Fill the details below and save the category.</p>
+                <h2>
+                  {editingId
+                    ? "Update Category"
+                    : "Create Category"}
+                </h2>
+
+                <p>
+                  Add the category information and save it
+                  to your product catalog.
+                </p>
               </div>
 
               <button
@@ -259,76 +318,122 @@ const Categories = () => {
                 className="category-cancel-edit"
                 onClick={resetForm}
               >
+                <FiX />
                 {editingId ? "Cancel Edit" : "Close"}
               </button>
             </div>
 
-            <form className="category-form-grid" onSubmit={handleSubmit}>
-              <div className="category-form-group">
-                <label>Category Name</label>
+            <div className="category-form-layout">
+              <form
+                className="category-form-grid"
+                onSubmit={handleSubmit}
+              >
+                <div className="category-form-group">
+                  <label>Category Name</label>
 
-                <input
-                  name="name"
-                  placeholder="Example: Rockets"
-                  value={form.name}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="category-form-group">
-                <label>Image URL</label>
-
-                <input
-                  name="image"
-                  placeholder="Paste category image URL"
-                  value={form.image}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="category-form-group category-form-full">
-                <label>Description</label>
-
-                <textarea
-                  name="description"
-                  placeholder="Enter a short category description"
-                  value={form.description}
-                  onChange={handleChange}
-                />
-              </div>
-
-              {form.image && (
-                <div className="category-image-preview category-form-full">
-                  <img
-                    src={form.image}
-                    alt="Category preview"
-                    onError={(event) => {
-                      event.currentTarget.src = defaultImage;
-                    }}
+                  <input
+                    name="name"
+                    placeholder="Example: Rockets"
+                    value={form.name}
+                    onChange={handleChange}
                   />
+                </div>
+
+                <div className="category-form-group">
+                  <label>Image URL</label>
+
+                  <input
+                    name="image"
+                    placeholder="Paste category image URL"
+                    value={form.image}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="category-form-group category-form-full">
+                  <label>Description</label>
+
+                  <textarea
+                    name="description"
+                    placeholder="Enter a short category description"
+                    value={form.description}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="category-save-btn category-form-full"
+                >
+                  {editingId
+                    ? "Update Category"
+                    : "Create Category"}
+                </button>
+              </form>
+
+              <div className="category-preview-panel">
+                <div className="category-preview-heading">
+                  <span>
+                    <FiImage />
+                  </span>
 
                   <div>
-                    <strong>Image Preview</strong>
-                    <p>Confirm the image before saving.</p>
+                    <strong>Live Preview</strong>
+                    <p>
+                      Preview how the category card will look.
+                    </p>
                   </div>
                 </div>
-              )}
 
-              <button
-                type="submit"
-                className="category-save-btn category-form-full"
-              >
-                {editingId ? "Update Category" : "Create Category"}
-              </button>
-            </form>
+                <div className="category-preview-card">
+                  <div className="category-preview-image">
+                    <img
+                      src={
+                        form.image || defaultImage
+                      }
+                      alt="Category preview"
+                      onError={(event) => {
+                        event.currentTarget.src =
+                          defaultImage;
+                      }}
+                    />
+                  </div>
+
+                  <div className="category-preview-content">
+                    <span>Category</span>
+
+                    <h3>
+                      {form.name ||
+                        "Category Name"}
+                    </h3>
+
+                    <p>
+                      {form.description ||
+                        "Your category description will appear here."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </section>
         )}
 
         <section className="category-list-panel">
           <div className="category-list-header">
             <div>
+              <span className="category-section-label">
+                Catalog Categories
+              </span>
+
               <h2>All Categories</h2>
-              <p>{filteredCategories.length} categories shown</p>
+
+              <p>
+                {filteredCategories.length} categor
+                {filteredCategories.length === 1
+                  ? "y"
+                  : "ies"}{" "}
+                shown
+              </p>
             </div>
 
             <div className="category-search-box">
@@ -338,69 +443,116 @@ const Categories = () => {
                 type="text"
                 placeholder="Search categories..."
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) =>
+                  setSearch(event.target.value)
+                }
               />
             </div>
           </div>
 
           {loading ? (
-            <div className="category-empty-state">Loading categories...</div>
+            <div className="category-empty-state">
+              <span className="category-loading-ring" />
+              <strong>
+                Loading categories...
+              </strong>
+              <p>
+                Please wait while category data is loaded.
+              </p>
+            </div>
           ) : filteredCategories.length === 0 ? (
-            <div className="category-empty-state">No categories found</div>
+            <div className="category-empty-state">
+              <FiFolder />
+              <strong>No categories found</strong>
+              <p>
+                Try changing the search text or add
+                a new category.
+              </p>
+            </div>
           ) : (
             <div className="category-card-grid">
-              {filteredCategories.map((category) => (
-                <article
-                  className="category-management-card"
-                  key={category._id}
-                >
-                  <div className="category-card-image">
-                    <img
-                      src={category.image || defaultImage}
-                      alt={category.name}
-                      onError={(event) => {
-                        event.currentTarget.src = defaultImage;
-                      }}
-                    />
+              {filteredCategories.map(
+                (category) => (
+                  <article
+                    className="category-management-card"
+                    key={category._id}
+                  >
+                    <div className="category-card-image">
+                      <img
+                        src={
+                          category.image ||
+                          defaultImage
+                        }
+                        alt={category.name}
+                        onError={(event) => {
+                          event.currentTarget.src =
+                            defaultImage;
+                        }}
+                      />
 
-                    <button
-                      type="button"
-                      className={`category-status-badge ${
-                        category.isActive ? "active" : "inactive"
-                      }`}
-                      onClick={() => handleStatusToggle(category)}
-                    >
-                      {category.isActive ? "Active" : "Inactive"}
-                    </button>
-                  </div>
-
-                  <div className="category-card-content">
-                    <h3>{category.name}</h3>
-
-                    <p>{category.description || "No description available"}</p>
-
-                    <div className="category-card-actions">
-                      <button
-                        type="button"
-                        className="category-edit-btn"
-                        onClick={() => handleEdit(category)}
-                      >
-                        <FiEdit2 />
-                        Edit
-                      </button>
+                      <div className="category-card-overlay" />
 
                       <button
                         type="button"
-                        className="category-delete-btn"
-                        onClick={() => handleDelete(category._id)}
+                        className={`category-status-badge ${
+                          category.isActive
+                            ? "active"
+                            : "inactive"
+                        }`}
+                        onClick={() =>
+                          handleStatusToggle(
+                            category
+                          )
+                        }
                       >
-                        <FiTrash2 />
-                        Delete
+                        <span />
+                        {category.isActive
+                          ? "Active"
+                          : "Inactive"}
                       </button>
                     </div>
-                  </div>
-                </article>
-              ))}
+
+                    <div className="category-card-content">
+                      <span className="category-card-label">
+                        Product Category
+                      </span>
+
+                      <h3>{category.name}</h3>
+
+                      <p>
+                        {category.description ||
+                          "No description available"}
+                      </p>
+
+                      <div className="category-card-actions">
+                        <button
+                          type="button"
+                          className="category-edit-btn"
+                          onClick={() =>
+                            handleEdit(category)
+                          }
+                        >
+                          <FiEdit2 />
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          className="category-delete-btn"
+                          onClick={() =>
+                            handleDelete(
+                              category._id
+                            )
+                          }
+                        >
+                          <FiTrash2 />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                )
+              )}
             </div>
           )}
         </section>

@@ -6,6 +6,7 @@ import {
   FiPackage,
   FiSearch,
   FiSlash,
+  FiTrendingUp,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 
@@ -214,13 +215,17 @@ const Stock = () => {
       <AdminSidebar />
 
       <main className="admin-content">
-        <header className="admin-topbar">
-          <div>
+        <header className="admin-topbar stock-topbar">
+          <div className="stock-topbar-copy">
+            <span className="stock-eyebrow">
+              Inventory Control
+            </span>
+
             <h1>Stock Management</h1>
 
             <p>
-              Monitor product stock and update
-              available quantities.
+              Monitor live inventory, identify low-stock products,
+              and update available quantities.
             </p>
           </div>
 
@@ -247,9 +252,10 @@ const Stock = () => {
               <FiPackage />
             </span>
 
-            <div>
+            <div className="stock-summary-content">
               <p>Total Stock</p>
               <strong>{totalStock}</strong>
+              <small>Available inventory units</small>
             </div>
           </article>
 
@@ -258,9 +264,10 @@ const Stock = () => {
               <FiCheck />
             </span>
 
-            <div>
+            <div className="stock-summary-content">
               <p>Healthy Products</p>
               <strong>{healthyStockCount}</strong>
+              <small>More than 10 units</small>
             </div>
           </article>
 
@@ -269,9 +276,10 @@ const Stock = () => {
               <FiAlertTriangle />
             </span>
 
-            <div>
+            <div className="stock-summary-content">
               <p>Low Stock</p>
               <strong>{lowStockCount}</strong>
+              <small>Between 1 and 10 units</small>
             </div>
           </article>
 
@@ -280,14 +288,34 @@ const Stock = () => {
               <FiSlash />
             </span>
 
-            <div>
+            <div className="stock-summary-content">
               <p>Out of Stock</p>
               <strong>{outOfStockCount}</strong>
+              <small>Needs immediate refill</small>
             </div>
           </article>
         </section>
 
         <section className="stock-management-panel">
+          <div className="stock-panel-header">
+            <div>
+              <span className="stock-section-label">
+                Inventory Records
+              </span>
+
+              <h2>Product Stock</h2>
+
+              <p>
+                Update stock quantities without changing product details.
+              </p>
+            </div>
+
+            <span className="stock-result-count">
+              {filteredProducts.length} product
+              {filteredProducts.length === 1 ? "" : "s"}
+            </span>
+          </div>
+
           <div className="stock-toolbar">
             <div className="stock-search-box">
               <FiSearch />
@@ -326,27 +354,17 @@ const Stock = () => {
             </select>
           </div>
 
-          <div className="stock-table-heading">
-            <div>
-              <h2>Product Stock</h2>
-
-              <p>
-                {filteredProducts.length} product
-                {filteredProducts.length === 1
-                  ? ""
-                  : "s"}{" "}
-                shown
-              </p>
-            </div>
-          </div>
-
           {loading ? (
             <div className="stock-empty-state">
-              Loading stock...
+              <span className="stock-loading-ring" />
+              <strong>Loading stock...</strong>
+              <p>Please wait while inventory data is loaded.</p>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="stock-empty-state">
-              No products found
+              <FiPackage />
+              <strong>No products found</strong>
+              <p>Try changing your search or stock filter.</p>
             </div>
           ) : (
             <div className="stock-table-wrapper">
@@ -379,37 +397,42 @@ const Stock = () => {
                                 <FiBox />
                               </span>
 
-                              <div>
+                              <div className="stock-product-copy">
                                 <strong>
                                   {product.name}
                                 </strong>
 
                                 <span>
-                                  {product.packQuantity ||
-                                    1}{" "}
-                                  {product.unit ||
-                                    "Piece"}{" "}
+                                  {product.packQuantity || 1}{" "}
+                                  {product.unit || "Piece"}{" "}
                                   /{" "}
-                                  {product.packType ||
-                                    "Single"}
+                                  {product.packType || "Single"}
                                 </span>
                               </div>
                             </div>
                           </td>
 
                           <td>
-                            {product.brand || "-"}
+                            <span className="stock-brand-value">
+                              {product.brand || "-"}
+                            </span>
                           </td>
 
                           <td>
-                            {product.category?.name ||
-                              "No Category"}
+                            <span className="stock-category-value">
+                              {product.category?.name ||
+                                "No Category"}
+                            </span>
                           </td>
 
                           <td>
-                            <strong className="stock-current-value">
-                              {product.stock}
-                            </strong>
+                            <div className="stock-current-cell">
+                              <strong className="stock-current-value">
+                                {product.stock}
+                              </strong>
+
+                              <span>units</span>
+                            </div>
                           </td>
 
                           <td>
@@ -421,22 +444,26 @@ const Stock = () => {
                           </td>
 
                           <td>
-                            <input
-                              className="stock-update-input"
-                              type="number"
-                              min="0"
-                              value={
-                                stockValues[
-                                  product._id
-                                ] ?? ""
-                              }
-                              onChange={(event) =>
-                                handleStockInputChange(
-                                  product._id,
-                                  event.target.value
-                                )
-                              }
-                            />
+                            <div className="stock-input-wrap">
+                              <FiTrendingUp />
+
+                              <input
+                                className="stock-update-input"
+                                type="number"
+                                min="0"
+                                value={
+                                  stockValues[
+                                    product._id
+                                  ] ?? ""
+                                }
+                                onChange={(event) =>
+                                  handleStockInputChange(
+                                    product._id,
+                                    event.target.value
+                                  )
+                                }
+                              />
+                            </div>
                           </td>
 
                           <td>
@@ -456,7 +483,7 @@ const Stock = () => {
                               {updatingId ===
                               product._id
                                 ? "Updating..."
-                                : "Update Stock"}
+                                : "Update"}
                             </button>
                           </td>
                         </tr>

@@ -11,6 +11,8 @@ import {
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 
+import logo from "../assets/logo-go.png";
+
 const menus = {
   super_admin: [
     {
@@ -24,19 +26,14 @@ const menus = {
       icon: FiUserPlus,
     },
     {
-      label: "Categories",
-      path: "/admin/categories",
-      icon: FiGrid,
-    },
-    {
-      label: "Products",
-      path: "/admin/products",
-      icon: FiPackage,
-    },
-    {
       label: "Customers",
       path: "/admin/customers",
       icon: FiUsers,
+    },
+    {
+      label: "Orders",
+      path: "/admin/orders",
+      icon: FiShoppingBag,
     },
     {
       label: "Stock",
@@ -44,9 +41,14 @@ const menus = {
       icon: FiArchive,
     },
     {
-      label: "Orders",
-      path: "/admin/orders",
-      icon: FiShoppingBag,
+      label: "Products",
+      path: "/admin/products",
+      icon: FiPackage,
+    },
+    {
+      label: "Categories",
+      path: "/admin/categories",
+      icon: FiGrid,
     },
   ],
 
@@ -107,64 +109,99 @@ const AdminSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const adminUser = JSON.parse(
-    localStorage.getItem("adminUser")
-  );
+  let adminUser = null;
 
-  const department =
-    adminUser?.department;
+  try {
+    adminUser = JSON.parse(localStorage.getItem("adminUser"));
+  } catch {
+    adminUser = null;
+  }
+
+  const department = adminUser?.department;
+  const currentMenus = menus[department] || [];
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
 
-    toast.success("Logged out");
+    toast.success("Logged out successfully");
 
     navigate("/admin/login", {
       replace: true,
     });
   };
 
+  const getDepartmentName = () => {
+    return String(department || "Admin")
+      .replaceAll("_", " ")
+      .toUpperCase();
+  };
+
   return (
     <aside className="admin-sidebar">
       <div className="admin-brand">
-        <h2>Japan Pattasu</h2>
-        <p>{department}</p>
+        <div className="admin-brand-center">
+          <div className="admin-logo-wrapper">
+            <img
+              src={logo}
+              alt="Japan Pattasu Logo"
+              className="admin-company-logo"
+            />
+          </div>
+
+          <div className="admin-brand-text">
+            <h2>Japan Pattasu</h2>
+            <p>{getDepartmentName()}</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className="admin-desktop-logout"
+          onClick={handleLogout}
+        >
+          <FiLogOut />
+          <span>Logout</span>
+        </button>
+
+        <button
+          type="button"
+          className="admin-mobile-logout"
+          onClick={handleLogout}
+          aria-label="Logout"
+          title="Logout"
+        >
+          <FiLogOut />
+        </button>
       </div>
 
-      <nav className="admin-nav">
-        {(menus[department] || []).map(
-          (menu) => {
-            const Icon = menu.icon;
-
-            return (
-              <button
-                key={menu.path}
-                className={
-                  location.pathname ===
-                  menu.path
-                    ? "active"
-                    : ""
-                }
-                onClick={() =>
-                  navigate(menu.path)
-                }
-              >
-                <Icon />
-                {menu.label}
-              </button>
-            );
-          }
-        )}
-      </nav>
-
-      <button
-        className="admin-logout-btn"
-        onClick={handleLogout}
+      <nav
+        className={`admin-nav ${
+          currentMenus.length <= 3 ? "admin-nav-compact" : ""
+        }`}
       >
-        <FiLogOut />
-        Logout
-      </button>
+        {currentMenus.map((menu) => {
+          const Icon = menu.icon;
+
+          const isActive =
+            location.pathname === menu.path ||
+            location.pathname.startsWith(`${menu.path}/`);
+
+          return (
+            <button
+              type="button"
+              key={menu.path}
+              className={isActive ? "active" : ""}
+              onClick={() => navigate(menu.path)}
+              aria-label={menu.label}
+              title={menu.label}
+            >
+              <Icon />
+              <span>{menu.label}</span>
+            </button>
+          );
+        })}
+      </nav>
     </aside>
   );
 };

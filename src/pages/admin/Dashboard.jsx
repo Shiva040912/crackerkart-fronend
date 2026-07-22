@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FiBox,
+  FiAlertTriangle,
+  FiArrowRight,
   FiGrid,
   FiLayers,
-  FiLogOut,
   FiPackage,
   FiShoppingBag,
   FiTrendingUp,
+  FiUserPlus,
   FiUsers,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
@@ -20,9 +21,15 @@ import AdminSidebar from "../../components/AdminSidebar";
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const adminUser = JSON.parse(
-    localStorage.getItem("adminUser") || "{}"
-  );
+  let adminUser = {};
+
+  try {
+    adminUser = JSON.parse(
+      localStorage.getItem("adminUser") || "{}"
+    );
+  } catch {
+    adminUser = {};
+  }
 
   const [summary, setSummary] = useState({
     totalCustomers: 0,
@@ -64,14 +71,6 @@ const Dashboard = () => {
     loadDashboard();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminUser");
-
-    toast.success("Admin logged out");
-    navigate("/admin/login");
-  };
-
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -81,7 +80,9 @@ const Dashboard = () => {
   };
 
   const formatDate = (date) => {
-    if (!date) return "-";
+    if (!date) {
+      return "-";
+    }
 
     return new Date(date).toLocaleDateString("en-IN", {
       day: "2-digit",
@@ -90,57 +91,117 @@ const Dashboard = () => {
     });
   };
 
+  const formatRole = (role) => {
+    return String(role || "Administrator")
+      .replaceAll("_", " ")
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  };
+
+  const getStatusClass = (status) => {
+    const normalizedStatus = String(
+      status || "confirmed"
+    ).toLowerCase();
+
+    return normalizedStatus.replaceAll(" ", "-");
+  };
+
   const cards = [
     {
       title: "Total Customers",
       value: summary.totalCustomers,
       text: "Registered customers",
       icon: <FiUsers />,
+      className: "customers",
     },
     {
       title: "Total Products",
       value: summary.totalProducts,
       text: "Products available",
       icon: <FiPackage />,
+      className: "products",
     },
     {
       title: "Total Categories",
       value: summary.totalCategories,
       text: "Product categories",
       icon: <FiGrid />,
+      className: "categories",
     },
     {
       title: "Total Stock",
       value: summary.totalStock,
       text: "Combined stock units",
       icon: <FiLayers />,
+      className: "stock",
     },
     {
       title: "Total Orders",
       value: summary.totalOrders,
       text: "Orders received",
       icon: <FiShoppingBag />,
+      className: "orders",
     },
     {
       title: "Total Revenue",
       value: formatCurrency(summary.totalRevenue),
-      text: "Paid non-cancelled orders",
+      text: "Revenue from paid orders",
       icon: <FiTrendingUp />,
+      className: "revenue",
+    },
+  ];
+
+  const quickActions = [
+    {
+      title: "Add Category",
+      text: "Create a new product category",
+      path: "/admin/categories",
+      icon: <FiGrid />,
+    },
+    {
+      title: "Add Product",
+      text: "Create and publish a product",
+      path: "/admin/products",
+      icon: <FiPackage />,
+    },
+    {
+      title: "View Customers",
+      text: "Manage registered customers",
+      path: "/admin/customers",
+      icon: <FiUsers />,
+    },
+    {
+      title: "Manage Stock",
+      text: "Review and update inventory",
+      path: "/admin/stock",
+      icon: <FiLayers />,
+    },
+    {
+      title: "Manage Orders",
+      text: "Track and update customer orders",
+      path: "/admin/orders",
+      icon: <FiShoppingBag />,
     },
   ];
 
   return (
     <div className="admin-layout">
-      <AdminSidebar/>
-        
+      <AdminSidebar />
 
       <main className="admin-content">
-        <header className="admin-topbar">
-          <div>
-            <h1>Dashboard</h1>
+        <header className="admin-topbar dashboard-topbar">
+          <div className="dashboard-heading">
+            <span className="dashboard-eyebrow">
+              Store Management
+            </span>
+
+            <h1>Dashboard Overview</h1>
+
             <p>
-              Welcome back, {adminUser?.name || "Admin"}.
-              Here is your store overview.
+              Welcome back,{" "}
+              <strong>
+                {adminUser?.name || "Admin"}
+              </strong>
+              . Here is the latest overview of your store.
             </p>
           </div>
 
@@ -152,43 +213,85 @@ const Dashboard = () => {
             </span>
 
             <div>
-              <strong>{adminUser?.name || "Admin"}</strong>
-              <small>Administrator</small>
+              <strong>
+                {adminUser?.name || "Admin"}
+              </strong>
+
+              <small>
+                {formatRole(
+                  adminUser?.department ||
+                    adminUser?.role
+                )}
+              </small>
             </div>
           </div>
         </header>
 
         {loading ? (
-          <div className="admin-loading">
-            Loading dashboard...
+          <div className="admin-loading dashboard-loading">
+            <span className="dashboard-loader" />
+            <p>Loading dashboard overview...</p>
           </div>
         ) : error ? (
-          <div className="admin-error">{error}</div>
+          <div className="admin-error dashboard-error">
+            <FiAlertTriangle />
+
+            <div>
+              <strong>Unable to load dashboard</strong>
+              <p>{error}</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={loadDashboard}
+            >
+              Try Again
+            </button>
+          </div>
         ) : (
           <>
             <section className="dashboard-summary-grid">
               {cards.map((card) => (
                 <article
-                  className="summary-card"
+                  className={`summary-card ${card.className}`}
                   key={card.title}
                 >
+                  <div className="summary-card-decoration" />
+
                   <div className="summary-card-head">
                     <span className="summary-card-icon">
                       {card.icon}
                     </span>
+
+                    <span className="summary-card-label">
+                      Overview
+                    </span>
                   </div>
 
-                  <h3>{card.title}</h3>
-                  <strong>{card.value}</strong>
-                  <p>{card.text}</p>
+                  <div className="summary-card-content">
+                    <h3>{card.title}</h3>
+                    <strong>{card.value}</strong>
+                    <p>{card.text}</p>
+                  </div>
                 </article>
               ))}
             </section>
 
             <section className="dashboard-section-grid">
-              <div className="dashboard-panel">
+              <div className="dashboard-panel recent-orders-panel">
                 <div className="dashboard-panel-header">
-                  <h2>Recent Orders</h2>
+                  <div>
+                    <span className="dashboard-panel-eyebrow">
+                      Latest Activity
+                    </span>
+
+                    <h2>Recent Orders</h2>
+
+                    <p>
+                      Latest customer orders received by
+                      the store
+                    </p>
+                  </div>
 
                   <button
                     type="button"
@@ -197,82 +300,134 @@ const Dashboard = () => {
                     }
                   >
                     View All
+                    <FiArrowRight />
                   </button>
                 </div>
 
                 {summary.recentOrders?.length === 0 ? (
                   <div className="dashboard-empty">
-                    No orders available
+                    <span>
+                      <FiShoppingBag />
+                    </span>
+
+                    <h3>No recent orders</h3>
+
+                    <p>
+                      New customer orders will appear here.
+                    </p>
                   </div>
                 ) : (
-                  <table className="recent-order-table">
-                    <thead>
-                      <tr>
-                        <th>Customer</th>
-                        <th>Invoice</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {summary.recentOrders.map((order) => (
-                        <tr key={order._id}>
-                          <td className="order-customer">
-                            <strong>
-                              {order.user?.name ||
-                                order.deliveryAddress
-                                  ?.fullName ||
-                                "Customer"}
-                            </strong>
-
-                            <span>
-                              {order.user?.email ||
-                                order.user?.phone ||
-                                "-"}
-                            </span>
-                          </td>
-
-                          <td>
-                            {order.invoiceNumber || "-"}
-                          </td>
-
-                          <td>
-                            {formatCurrency(
-                              order.totalAmount ||
-                                order.grandTotal ||
-                                0
-                            )}
-                          </td>
-
-                          <td>
-                            <span
-                              className={`dashboard-status ${
-                                order.orderStatus ===
-                                "cancelled"
-                                  ? "cancelled"
-                                  : ""
-                              }`}
-                            >
-                              {order.orderStatus ||
-                                "confirmed"}
-                            </span>
-                          </td>
-
-                          <td>
-                            {formatDate(order.createdAt)}
-                          </td>
+                  <div className="recent-order-table-wrapper">
+                    <table className="recent-order-table">
+                      <thead>
+                        <tr>
+                          <th>Customer</th>
+                          <th>Invoice</th>
+                          <th>Amount</th>
+                          <th>Status</th>
+                          <th>Date</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+
+                      <tbody>
+                        {summary.recentOrders.map(
+                          (order) => {
+                            const orderStatus =
+                              order.orderStatus ||
+                              "confirmed";
+
+                            return (
+                              <tr key={order._id}>
+                                <td className="order-customer">
+                                  <div className="order-customer-content">
+                                    <span className="order-customer-avatar">
+                                      {(
+                                        order.user?.name ||
+                                        order
+                                          .deliveryAddress
+                                          ?.fullName ||
+                                        "C"
+                                      )
+                                        .charAt(0)
+                                        .toUpperCase()}
+                                    </span>
+
+                                    <div>
+                                      <strong>
+                                        {order.user?.name ||
+                                          order
+                                            .deliveryAddress
+                                            ?.fullName ||
+                                          "Customer"}
+                                      </strong>
+
+                                      <span>
+                                        {order.user?.email ||
+                                          order.user
+                                            ?.phone ||
+                                          "-"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td>
+                                  <span className="order-invoice">
+                                    {order.invoiceNumber ||
+                                      "-"}
+                                  </span>
+                                </td>
+
+                                <td>
+                                  <strong className="order-amount">
+                                    {formatCurrency(
+                                      order.totalAmount ||
+                                        order.grandTotal ||
+                                        0
+                                    )}
+                                  </strong>
+                                </td>
+
+                                <td>
+                                  <span
+                                    className={`dashboard-status ${getStatusClass(
+                                      orderStatus
+                                    )}`}
+                                  >
+                                    {orderStatus}
+                                  </span>
+                                </td>
+
+                                <td>
+                                  <span className="order-date">
+                                    {formatDate(
+                                      order.createdAt
+                                    )}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          }
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
 
-              <div className="dashboard-panel">
+              <div className="dashboard-panel low-stock-panel">
                 <div className="dashboard-panel-header">
-                  <h2>Low Stock</h2>
+                  <div>
+                    <span className="dashboard-panel-eyebrow">
+                      Inventory Alert
+                    </span>
+
+                    <h2>Low Stock</h2>
+
+                    <p>
+                      Products requiring stock attention
+                    </p>
+                  </div>
 
                   <button
                     type="button"
@@ -281,12 +436,22 @@ const Dashboard = () => {
                     }
                   >
                     Manage
+                    <FiArrowRight />
                   </button>
                 </div>
 
                 {summary.lowStockProducts?.length === 0 ? (
-                  <div className="dashboard-empty">
-                    All products have enough stock
+                  <div className="dashboard-empty low-stock-empty">
+                    <span>
+                      <FiLayers />
+                    </span>
+
+                    <h3>Stock levels are healthy</h3>
+
+                    <p>
+                      All products currently have enough
+                      stock.
+                    </p>
                   </div>
                 ) : (
                   <div className="low-stock-list">
@@ -296,17 +461,25 @@ const Dashboard = () => {
                           className="low-stock-item"
                           key={product._id}
                         >
-                          <div>
-                            <h4>{product.name}</h4>
-                            <p>
-                              {product.brand ||
-                                "No brand"}
-                            </p>
+                          <div className="low-stock-product">
+                            <span className="low-stock-warning">
+                              <FiAlertTriangle />
+                            </span>
+
+                            <div>
+                              <h4>{product.name}</h4>
+
+                              <p>
+                                {product.brand ||
+                                  "No brand"}
+                              </p>
+                            </div>
                           </div>
 
-                          <span className="low-stock-count">
-                            {product.stock}
-                          </span>
+                          <div className="low-stock-value">
+                            <strong>{product.stock}</strong>
+                            <span>left</span>
+                          </div>
                         </div>
                       )
                     )}
@@ -315,46 +488,46 @@ const Dashboard = () => {
               </div>
             </section>
 
-            <section className="dashboard-quick-actions">
-              <button
-                onClick={() =>
-                  navigate("/admin/categories")
-                }
-              >
-                + Add Category
-              </button>
+            <section className="dashboard-quick-actions-section">
+              <div className="dashboard-section-heading">
+                <div>
+                  <span className="dashboard-panel-eyebrow">
+                    Shortcuts
+                  </span>
 
-              <button
-                onClick={() =>
-                  navigate("/admin/products")
-                }
-              >
-                + Add Product
-              </button>
+                  <h2>Quick Actions</h2>
 
-              <button
-                onClick={() =>
-                  navigate("/admin/customers")
-                }
-              >
-                View Customers
-              </button>
+                  <p>
+                    Access frequently used management
+                    sections
+                  </p>
+                </div>
+              </div>
 
-              <button
-                onClick={() =>
-                  navigate("/admin/stock")
-                }
-              >
-                Manage Stock
-              </button>
+              <div className="dashboard-quick-actions">
+                {quickActions.map((action) => (
+                  <button
+                    type="button"
+                    key={action.title}
+                    onClick={() =>
+                      navigate(action.path)
+                    }
+                  >
+                    <span className="quick-action-icon">
+                      {action.icon}
+                    </span>
 
-              <button
-                onClick={() =>
-                  navigate("/admin/orders")
-                }
-              >
-                Manage Orders
-              </button>
+                    <span className="quick-action-content">
+                      <strong>{action.title}</strong>
+                      <small>{action.text}</small>
+                    </span>
+
+                    <span className="quick-action-arrow">
+                      <FiArrowRight />
+                    </span>
+                  </button>
+                ))}
+              </div>
             </section>
           </>
         )}

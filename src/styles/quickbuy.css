@@ -140,46 +140,65 @@
 }
 
 .quickbuy-search {
-  padding: 0 16px;
-
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 12px;
+
+  height: 54px;
+  padding: 0 16px;
+
+  border: 1px solid var(--border);
+  border-radius: 15px;
+
+  background: var(--surface);
+  box-shadow: var(--shadow);
+
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
 
-.quickbuy-search:focus-within,
-.quickbuy-filters select:focus {
+.quickbuy-search:focus-within {
   border-color: var(--primary);
   box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
 }
 
 .quickbuy-search svg {
-  flex-shrink: 0;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
 
   color: var(--primary);
-
-  font-size: 19px;
 }
 
 .quickbuy-search input {
+  flex: 1;
+
   width: 100%;
-  height: 52px;
+  min-width: 0;
+  height: 100%;
+
+  margin: 0;
+  padding: 0;
 
   border: none;
   outline: none;
 
   background: transparent;
-  color: var(--text);
+
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
+  caret-color: var(--text);
 
   font-family: inherit;
-  font-size: 14px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .quickbuy-search input::placeholder {
   color: var(--text-light);
+  -webkit-text-fill-color: var(--text-light);
+  opacity: 1;
 }
-
 .quickbuy-filters select {
   padding: 0 14px;
 
@@ -1418,12 +1437,16 @@
 ========================================= */
 
 .quickbuy-page button:focus-visible,
-.quickbuy-page input:focus-visible,
 .quickbuy-page select:focus-visible {
   outline: 3px solid rgba(245, 158, 11, 0.35);
   outline-offset: 3px;
 }
 
+.quickbuy-page input:focus,
+.quickbuy-page input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
 /* =========================================
    REDUCED MOTION
 ========================================= */

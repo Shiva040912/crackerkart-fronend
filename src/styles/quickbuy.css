@@ -602,9 +602,7 @@
   white-space: nowrap;
 }
 
-/* =========================================
-   ORDER SUMMARY
-========================================= */
+
 
 .quickbuy-summary {
   position: sticky;
@@ -778,17 +776,13 @@
   cursor: not-allowed;
 }
 
-/* =========================================
-   MOBILE CHECKOUT BAR
-========================================= */
+
 
 .quickbuy-mobile-checkout-bar {
   display: none;
 }
 
-/* =========================================
-   STATUS
-========================================= */
+
 
 .quickbuy-status {
   min-height: 360px;
@@ -855,9 +849,7 @@
   cursor: pointer;
 }
 
-/* =========================================
-   LOADING
-========================================= */
+
 
 .quickbuy-loading-list {
   border: 1px solid var(--border);
@@ -957,9 +949,7 @@
   }
 }
 
-/* =========================================
-   SMALL DESKTOP
-========================================= */
+
 
 @media (max-width: 1280px) {
   .quickbuy-layout {
@@ -1397,9 +1387,7 @@
   }
 }
 
-/* =========================================
-   SMALL MOBILE
-========================================= */
+
 
 @media (max-width: 390px) {
   .quickbuy-page {
@@ -1432,9 +1420,7 @@
   }
 }
 
-/* =========================================
-   ACCESSIBILITY
-========================================= */
+
 
 .quickbuy-page button:focus-visible,
 .quickbuy-page select:focus-visible {
@@ -1447,9 +1433,7 @@
   outline: none !important;
   box-shadow: none !important;
 }
-/* =========================================
-   REDUCED MOTION
-========================================= */
+
 
 @media (prefers-reduced-motion: reduce) {
   .quickbuy-skeleton-image::after,

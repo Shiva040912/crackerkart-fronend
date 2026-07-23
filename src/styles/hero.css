@@ -17,7 +17,8 @@
 
   overflow: hidden;
 
-  background-size: 100% 100%;
+  background-image: var(--hero-desktop-image);
+  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-color: #020617;
@@ -357,8 +358,6 @@
     max-height: 720px;
 
     padding: 48px 5% 108px;
-
-    background-size: 100% 100%;
   }
 
   .hero-content {
@@ -390,16 +389,18 @@
 
     align-items: center;
 
+    background-image: var(--hero-mobile-image);
     background-size: cover;
-    background-position: 56% center;
+    background-position: center;
   }
 
   .hero-section::before {
     background: linear-gradient(
-      90deg,
-      rgba(2, 6, 23, 0.9) 0%,
-      rgba(2, 6, 23, 0.75) 48%,
-      rgba(2, 6, 23, 0.24) 100%
+      180deg,
+      rgba(2, 6, 23, 0.84) 0%,
+      rgba(2, 6, 23, 0.66) 42%,
+      rgba(2, 6, 23, 0.22) 72%,
+      rgba(2, 6, 23, 0.62) 100%
     );
   }
 
@@ -426,17 +427,18 @@
 
     align-items: flex-start;
 
+    background-image: var(--hero-mobile-image);
     background-size: cover;
-    background-position: 58% center;
+    background-position: center;
   }
 
   .hero-section::before {
     background: linear-gradient(
       180deg,
-      rgba(2, 6, 23, 0.8) 0%,
-      rgba(2, 6, 23, 0.66) 40%,
-      rgba(2, 6, 23, 0.25) 70%,
-      rgba(2, 6, 23, 0.62) 100%
+      rgba(2, 6, 23, 0.82) 0%,
+      rgba(2, 6, 23, 0.64) 38%,
+      rgba(2, 6, 23, 0.2) 70%,
+      rgba(2, 6, 23, 0.64) 100%
     );
   }
 
@@ -534,7 +536,8 @@
 
     padding: 32px 14px 106px;
 
-    background-position: 60% center;
+    background-image: var(--hero-mobile-image);
+    background-position: center;
   }
 
   .hero-badge {

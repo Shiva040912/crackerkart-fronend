@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
-import backgroundImage from "../assets/background.png";
+import desktopBackground from "../assets/background.png";
+import mobileBackground from "../assets/MM6.png";
 
 import "../styles/hero.css";
 
@@ -29,7 +30,8 @@ const Hero = () => {
     <section
       className="hero-section"
       style={{
-        backgroundImage: `url(${backgroundImage})`,
+        "--hero-desktop-image": `url(${desktopBackground})`,
+        "--hero-mobile-image": `url(${mobileBackground})`,
       }}
     >
       <div className="hero-content">
@@ -61,8 +63,6 @@ const Hero = () => {
           </button>
         </div>
       </div>
-
-      
 
       <div className="dealer-ticker-section">
         <p>Our Trusted Dealers</p>

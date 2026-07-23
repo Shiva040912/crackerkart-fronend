@@ -1508,3 +1508,179 @@
     border-radius: 12px;
   }
 }
+/* =========================================
+   PROFESSIONAL SETTLED THEME OVERRIDES
+   Slate + White + Single Amber Accent
+========================================= */
+
+.dashboard-topbar {
+  background:
+    radial-gradient(circle at 86% 18%, rgba(245, 158, 11, 0.12), transparent 28%),
+    linear-gradient(135deg, #172033 0%, #111827 52%, #0b1120 100%);
+}
+
+.dashboard-banner-orb-two {
+  border-color: rgba(148, 163, 184, 0.1);
+  background: rgba(148, 163, 184, 0.025);
+}
+
+.dashboard-summary-grid {
+  gap: 16px;
+}
+
+.summary-card,
+.summary-card.customers,
+.summary-card.products,
+.summary-card.categories,
+.summary-card.stock,
+.summary-card.orders,
+.summary-card.revenue {
+  --card-accent: #d97706;
+  --card-soft: #fffaf0;
+  --card-border: #f3d7a2;
+  min-height: 168px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+.summary-card::before {
+  height: 3px;
+  background: #d97706;
+}
+
+.summary-card-decoration {
+  border-color: #fff8e8;
+  opacity: 0.75;
+}
+
+.summary-card:hover {
+  border-color: #e9c77f;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.1);
+  transform: translateY(-3px);
+}
+
+.summary-card-icon {
+  border-color: #f1dfb8;
+  background: #fffaf0;
+  color: #b45309;
+  box-shadow: none;
+}
+
+.summary-card-label {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.summary-card h3 {
+  color: #475569;
+}
+
+.summary-card p {
+  color: #94a3b8;
+}
+
+.dashboard-panel,
+.dashboard-quick-actions-section {
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.055);
+}
+
+.dashboard-panel-header button {
+  border-color: #d7dee8;
+  background: #f8fafc;
+  color: #334155;
+}
+
+.dashboard-panel-header button:hover {
+  border-color: #d97706;
+  background: #fffaf0;
+  color: #a16207;
+  transform: translateY(-1px);
+}
+
+.recent-order-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.order-customer-avatar {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+}
+
+.low-stock-panel {
+  background: #ffffff;
+}
+
+.low-stock-item {
+  border-color: #e2e8f0;
+  background: #ffffff;
+}
+
+.low-stock-item:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.low-stock-warning {
+  border-color: #fee2e2;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.low-stock-value {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+}
+
+.dashboard-quick-actions-section {
+  background: #ffffff;
+}
+
+.dashboard-quick-actions button {
+  min-height: 108px;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.dashboard-quick-actions button::after {
+  background: rgba(217, 119, 6, 0.05);
+}
+
+.dashboard-quick-actions button:hover {
+  border-color: #e9c77f;
+  background: #fffdf8;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+.quick-action-icon {
+  border-color: #f1dfb8;
+  background: #fffaf0;
+  color: #b45309;
+}
+
+.quick-action-arrow,
+.dashboard-quick-actions button:hover .quick-action-arrow {
+  color: #94a3b8;
+}
+
+@media (max-width: 650px) {
+  .summary-card,
+  .summary-card.customers,
+  .summary-card.products,
+  .summary-card.categories,
+  .summary-card.stock,
+  .summary-card.orders,
+  .summary-card.revenue {
+    min-height: 142px;
+    border-radius: 15px;
+  }
+
+  .dashboard-panel,
+  .dashboard-quick-actions-section {
+    border-radius: 16px;
+  }
+}

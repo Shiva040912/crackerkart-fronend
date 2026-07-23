@@ -188,7 +188,6 @@ const ProductSection = () => {
   const decreaseQty = async (cartItem) => {
     if (cartItem.quantity === 1) {
       await removeCartItem(cartItem._id);
-
       setCartItems((prev) => prev.filter((item) => item._id !== cartItem._id));
     } else {
       await updateCartItem(cartItem._id, {
@@ -281,362 +280,357 @@ const ProductSection = () => {
 
   const getStockText = (stock) => {
     if (stock === 0) return "Out of Stock";
-    if (stock <= 10) return `Only ${stock} left`;
+    if (stock <= 10) return `Only ${stock} left!`;
     return "In Stock";
   };
 
- return (
-  <section className="product-page">
-    <div className="product-hero">
-      <p>Premium Fireworks Store</p>
-      <h1>Popular Pattasu Collections</h1>
-      <span>Choose safe and celebration-ready fireworks.</span>
-    </div>
-
-    <div className="product-filter-panel">
-      <div className="product-search-box">
-        <FiSearch className="search-icon" />
-
-        <input
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setCurrentPage(1);
-          }}
-        />
-
-        {search && (
-          <button onClick={() => setSearch("")}>
-            <FiX />
-          </button>
-        )}
+  return (
+    <section className="product-page">
+      <div className="product-hero">
+        <p>Japan Pattasu Deluxe Store</p>
+        <h1>Explore Firecracker Collections</h1>
+        <span>High-visibility, safe, and exciting celebration specials.</span>
       </div>
 
-      <select
-        value={sortBy}
-        onChange={(e) => {
-          setSortBy(e.target.value);
-          setCurrentPage(1);
-        }}
-      >
-        <option value="latest">Latest</option>
-        <option value="low">Price Low to High</option>
-        <option value="high">Price High to Low</option>
-        <option value="az">A - Z</option>
-        <option value="za">Z - A</option>
-      </select>
+      <div className="product-filter-panel">
+        <div className="product-search-box">
+          <FiSearch className="search-icon" />
 
-      <div className="view-toggle">
-        <button
-          className={viewMode === "grid" ? "active-view" : ""}
-          onClick={() => setViewMode("grid")}
-          aria-label="Grid view"
-        >
-          <FiGrid />
-        </button>
+          <input
+            placeholder="Search crackers by name (e.g., Flower Pot, Twinkling Star)..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
 
-        <button
-          className={viewMode === "list" ? "active-view" : ""}
-          onClick={() => setViewMode("list")}
-          aria-label="List view"
-        >
-          <FiList />
-        </button>
-      </div>
-    </div>
-
-    <div className="mobile-product-toolbar">
-      <button
-        className="mobile-filter-btn"
-        onClick={() => setShowMobileFilters(true)}
-      >
-        <FiFilter />
-        Filters
-      </button>
-
-      <p>
-        <strong>{filteredProducts.length}</strong> Products
-      </p>
-    </div>
-
-    <div className="product-layout">
-      <aside
-        className={`filter-sidebar ${
-          showMobileFilters ? "mobile-filter-open" : ""
-        }`}
-      >
-        <div className="filter-head">
-          <div className="filter-title-row">
-            <button
-              className="mobile-filter-close"
-              onClick={() => setShowMobileFilters(false)}
-              aria-label="Close filters"
-            >
+          {search && (
+            <button onClick={() => setSearch("")} aria-label="Clear search">
               <FiX />
             </button>
-
-            <h3>Filters</h3>
-          </div>
-
-          <button className="filter-reset-btn" onClick={resetFilters}>
-            Reset
-          </button>
-        </div>
-
-        <label>Category</label>
-
-        <select
-          value={categoryFilter}
-          onChange={(e) => {
-            setCategoryFilter(e.target.value);
-            setCurrentPage(1);
-          }}
-        >
-          <option value="all">All Categories</option>
-
-          {categories.map((cat) => (
-            <option value={cat._id} key={cat._id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-
-        <label>Brand</label>
-
-        <select
-          value={brandFilter}
-          onChange={(e) => {
-            setBrandFilter(e.target.value);
-            setCurrentPage(1);
-          }}
-        >
-          <option value="all">All Brands</option>
-
-          {brands.map((brand) => (
-            <option value={brand} key={brand}>
-              {brand}
-            </option>
-          ))}
-        </select>
-
-        <label>Price</label>
-
-        <select
-          value={priceFilter}
-          onChange={(e) => {
-            setPriceFilter(e.target.value);
-            setCurrentPage(1);
-          }}
-        >
-          <option value="all">All Price</option>
-          <option value="under500">Below ₹500</option>
-          <option value="500to1000">₹500 - ₹1000</option>
-          <option value="above1000">Above ₹1000</option>
-        </select>
-
-        <label>Availability</label>
-
-        <select
-          value={stockFilter}
-          onChange={(e) => {
-            setStockFilter(e.target.value);
-            setCurrentPage(1);
-          }}
-        >
-          <option value="all">All</option>
-          <option value="instock">In Stock</option>
-          <option value="outstock">Out of Stock</option>
-        </select>
-
-        <label>Pack Type</label>
-
-        <select
-          value={packFilter}
-          onChange={(e) => {
-            setPackFilter(e.target.value);
-            setCurrentPage(1);
-          }}
-        >
-          <option value="all">All</option>
-          <option value="Single">Single</option>
-          <option value="Box">Box</option>
-          <option value="Bundle">Bundle</option>
-        </select>
-
-        <button
-          className="mobile-apply-filter-btn"
-          onClick={() => setShowMobileFilters(false)}
-        >
-          Show {filteredProducts.length} Products
-        </button>
-      </aside>
-
-      {showMobileFilters && (
-        <button
-          className="mobile-filter-overlay"
-          onClick={() => setShowMobileFilters(false)}
-          aria-label="Close filters"
-        />
-      )}
-
-      <div className="products-content">
-        <p className="product-result-info">
-          Showing <strong>{currentProducts.length}</strong> of{" "}
-          <strong>{filteredProducts.length}</strong> products
-        </p>
-
-        <div
-          className={
-            viewMode === "grid"
-              ? "customer-product-grid"
-              : "customer-product-grid list-view"
-          }
-        >
-          {currentProducts.length === 0 ? (
-            <div className="no-products-box">
-              <h3>No products found</h3>
-              <p>Try changing filters.</p>
-            </div>
-          ) : (
-            currentProducts.map((product) => {
-              const cartItem = getCartItem(product._id);
-              const isOutOfStock = product.stock === 0;
-
-              return (
-                <div className="customer-product-card" key={product._id}>
-                  <div className="product-image-box">
-                    <img
-                      src={product.imageUrl || defaultImage}
-                      alt={product.name}
-                    />
-
-                    <button
-                      className={`wishlist-btn ${
-                        isWishlisted(product._id) ? "wish-active" : ""
-                      }`}
-                      onClick={() => toggleWishlist(product._id)}
-                      aria-label="Toggle wishlist"
-                    >
-                      <FiHeart />
-                    </button>
-
-                    <span className="stock-chip">
-                      {getStockText(product.stock)}
-                    </span>
-
-                    {product.discount > 0 && (
-                      <span className="discount-chip">
-                        {product.discount}% OFF
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="customer-product-content">
-                    <p className="product-category">
-                      {product.brand || "No Brand"}
-                    </p>
-
-                    <h3>{product.name}</h3>
-
-                    <p className="pack-info">
-                      {product.packQuantity || 1} {product.unit || "Piece"} /{" "}
-                      {product.packType || "Single"}
-                    </p>
-
-                    <p className="product-price">₹{product.price}</p>
-
-                    <div className="customer-product-actions">
-                      {cartItem ? (
-                        <div className="qty-action-box">
-                          <button
-                            onClick={() => decreaseQty(cartItem)}
-                            aria-label="Decrease quantity"
-                          >
-                            <FiMinus />
-                          </button>
-
-                          <span>{cartItem.quantity}</span>
-
-                          <button
-                            onClick={() => increaseQty(cartItem)}
-                            aria-label="Increase quantity"
-                          >
-                            <FiPlus />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          className="add-cart-btn"
-                          disabled={isOutOfStock}
-                          onClick={() => handleAddToCart(product)}
-                        >
-                          <FiShoppingCart />
-                          Add To Cart
-                        </button>
-                      )}
-
-                      {product.price >= 1000 && !isOutOfStock && (
-                        <button
-                          className="buy-now-btn"
-                          onClick={() => handleBuyNow(product)}
-                        >
-                          <FiZap />
-                          Buy Now
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })
           )}
         </div>
 
-        {totalPages > 1 && (
-          <div className="pagination">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(1)}
-            >
-              First
-            </button>
+        <select
+          value={sortBy}
+          onChange={(e) => {
+            setSortBy(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="latest">Sort: Latest</option>
+          <option value="low">Price: Low to High</option>
+          <option value="high">Price: High to Low</option>
+          <option value="az">Name: A to Z</option>
+          <option value="za">Name: Z to A</option>
+        </select>
 
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(currentPage - 1)}
-            >
-              Prev
-            </button>
+        <div className="view-toggle">
+          <button
+            className={viewMode === "grid" ? "active-view" : ""}
+            onClick={() => setViewMode("grid")}
+            aria-label="Grid view"
+          >
+            <FiGrid />
+          </button>
 
-            {[...Array(totalPages)].map((_, index) => (
+          <button
+            className={viewMode === "list" ? "active-view" : ""}
+            onClick={() => setViewMode("list")}
+            aria-label="List view"
+          >
+            <FiList />
+          </button>
+        </div>
+      </div>
+
+      <div className="mobile-product-toolbar">
+        <button
+          className="mobile-filter-btn"
+          onClick={() => setShowMobileFilters(true)}
+        >
+          <FiFilter />
+          Filters
+        </button>
+
+        <p>
+          <strong>{filteredProducts.length}</strong> Products Found
+        </p>
+      </div>
+
+      <div className="product-layout">
+        <aside
+          className={`filter-sidebar ${
+            showMobileFilters ? "mobile-filter-open" : ""
+          }`}
+        >
+          <div className="filter-head">
+            <div className="filter-title-row">
               <button
-                key={index}
-                className={currentPage === index + 1 ? "active-page" : ""}
-                onClick={() => setCurrentPage(index + 1)}
+                className="mobile-filter-close"
+                onClick={() => setShowMobileFilters(false)}
+                aria-label="Close filters"
               >
-                {index + 1}
+                <FiX />
               </button>
-            ))}
 
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(currentPage + 1)}
-            >
-              Next
-            </button>
+              <h3>Filters</h3>
+            </div>
 
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(totalPages)}
-            >
-              Last
+            <button className="filter-reset-btn" onClick={resetFilters}>
+              Reset All
             </button>
           </div>
+
+          <label>Category</label>
+          <select
+            value={categoryFilter}
+            onChange={(e) => {
+              setCategoryFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="all">All Categories</option>
+            {categories.map((cat) => (
+              <option value={cat._id} key={cat._id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+
+          <label>Brand / Manufacturer</label>
+          <select
+            value={brandFilter}
+            onChange={(e) => {
+              setBrandFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="all">All Brands</option>
+            {brands.map((brand) => (
+              <option value={brand} key={brand}>
+                {brand}
+              </option>
+            ))}
+          </select>
+
+          <label>Price Range</label>
+          <select
+            value={priceFilter}
+            onChange={(e) => {
+              setPriceFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="all">All Prices</option>
+            <option value="under500">Below ₹500</option>
+            <option value="500to1000">₹500 - ₹1000</option>
+            <option value="above1000">Above ₹1000</option>
+          </select>
+
+          <label>Availability</label>
+          <select
+            value={stockFilter}
+            onChange={(e) => {
+              setStockFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="all">All Stock Status</option>
+            <option value="instock">In Stock</option>
+            <option value="outstock">Out of Stock</option>
+          </select>
+
+          <label>Pack Type</label>
+          <select
+            value={packFilter}
+            onChange={(e) => {
+              setPackFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="all">All Packs</option>
+            <option value="Single">Single</option>
+            <option value="Box">Box</option>
+            <option value="Bundle">Bundle</option>
+          </select>
+
+          <button
+            className="mobile-apply-filter-btn"
+            onClick={() => setShowMobileFilters(false)}
+          >
+            Show {filteredProducts.length} Products
+          </button>
+        </aside>
+
+        {showMobileFilters && (
+          <button
+            className="mobile-filter-overlay"
+            onClick={() => setShowMobileFilters(false)}
+            aria-label="Close filters"
+          />
         )}
+
+        <div className="products-content">
+          <p className="product-result-info">
+            Showing <strong>{currentProducts.length}</strong> of{" "}
+            <strong>{filteredProducts.length}</strong> available items
+          </p>
+
+          <div
+            className={
+              viewMode === "grid"
+                ? "customer-product-grid"
+                : "customer-product-grid list-view"
+            }
+          >
+            {currentProducts.length === 0 ? (
+              <div className="no-products-box">
+                <h3>No crackers found matching your filter</h3>
+                <p>Try resetting filters or searching with a different name.</p>
+              </div>
+            ) : (
+              currentProducts.map((product) => {
+                const cartItem = getCartItem(product._id);
+                const isOutOfStock = product.stock === 0;
+
+                return (
+                  <div className="customer-product-card" key={product._id}>
+                    <div className="product-image-box">
+                      <img
+                        src={product.imageUrl || defaultImage}
+                        alt={product.name}
+                      />
+
+                      <button
+                        className={`wishlist-btn ${
+                          isWishlisted(product._id) ? "wish-active" : ""
+                        }`}
+                        onClick={() => toggleWishlist(product._id)}
+                        aria-label="Toggle wishlist"
+                      >
+                        <FiHeart />
+                      </button>
+
+                      <span className="stock-chip">
+                        {getStockText(product.stock)}
+                      </span>
+
+                      {product.discount > 0 && (
+                        <span className="discount-chip">
+                          {product.discount}% OFF
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="customer-product-content">
+                      <p className="product-category">
+                        {product.brand || "Standard Brand"}
+                      </p>
+
+                      <h3>{product.name}</h3>
+
+                      <p className="pack-info">
+                        Pack: {product.packQuantity || 1}{" "}
+                        {product.unit || "Piece"} ({product.packType || "Single"}
+                        )
+                      </p>
+
+                      <p className="product-price">₹{product.price}</p>
+
+                      <div className="customer-product-actions">
+                        {cartItem ? (
+                          <div className="qty-action-box">
+                            <button
+                              onClick={() => decreaseQty(cartItem)}
+                              aria-label="Decrease quantity"
+                            >
+                              <FiMinus />
+                            </button>
+
+                            <span>{cartItem.quantity}</span>
+
+                            <button
+                              onClick={() => increaseQty(cartItem)}
+                              aria-label="Increase quantity"
+                            >
+                              <FiPlus />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className="add-cart-btn"
+                            disabled={isOutOfStock}
+                            onClick={() => handleAddToCart(product)}
+                          >
+                            <FiShoppingCart />
+                            {isOutOfStock ? "Sold Out" : "Add To Cart"}
+                          </button>
+                        )}
+
+                        {product.price >= 1000 && !isOutOfStock && (
+                          <button
+                            className="buy-now-btn"
+                            onClick={() => handleBuyNow(product)}
+                          >
+                            <FiZap />
+                            Quick Buy
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(1)}
+              >
+                First
+              </button>
+
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+              >
+                Prev
+              </button>
+
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index}
+                  className={currentPage === index + 1 ? "active-page" : ""}
+                  onClick={() => setCurrentPage(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+              >
+                Next
+              </button>
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(totalPages)}
+              >
+                Last
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  </section>
-);
-}
+    </section>
+  );
+};
+
 export default ProductSection;

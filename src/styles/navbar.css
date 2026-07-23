@@ -3,9 +3,11 @@
 ===================================================== */
 
 .navbar {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 1000;
+  left: 0;
+  right: 0;
+  z-index: 5000;
 
   width: 100%;
 
@@ -17,6 +19,15 @@
 
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.navbar-spacer {
+  width: 100%;
+  height: 78px;
+  flex-shrink: 0;
 }
 
 /* =====================================================
@@ -620,6 +631,10 @@
 @media (max-width: 768px) {
   body {
     padding-bottom: calc(74px + env(safe-area-inset-bottom));
+  }
+
+  .navbar-spacer {
+    height: 64px;
   }
 
   .navbar-main-row {
